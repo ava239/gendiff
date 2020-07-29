@@ -26,9 +26,11 @@ function compare($first, $second, $format = 'json')
 
 function readFile($file)
 {
-    $isCurrentDir = ! Strings\startsWith($file, '/') && ! Strings\startsWith($file, '~');
+    $isCurrentDir = ! Strings\startsWith($file, '/') &&
+        ! Strings\startsWith($file, '~') &&
+        ! Strings\startsWith($file, '.');
     if ($isCurrentDir) {
-        $filePath = __DIR__ . "/../$file";
+        $filePath = "./$file";
     } else {
         $filePath = $file;
     }
