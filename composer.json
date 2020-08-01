@@ -15,14 +15,15 @@
   "require": {
     "docopt/docopt": "^1.0",
     "phpunit/phpunit": "^9.2",
-    "funct/funct": "^1.5",
     "ext-json": "*",
     "wp-cli/php-cli-tools": "^0.11.11"
   },
   "autoload": {
     "files": [
       "src/Gendiff.php",
-      "src/formats/Json.php",
+      "src/Output.php",
+      "src/Core.php",
+      "src/FormatParser.php",
       "src/output/Pretty.php"
     ]
   },

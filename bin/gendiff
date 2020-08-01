@@ -26,4 +26,4 @@ DOC;
 
 $args = Docopt::handle($doc);
 
-Gendiff\Gendiff\outputDiff($args['<firstFile>'], $args['<secondFile>']);
+cli\line(Gendiff\Gendiff\compareFiles($args['<firstFile>'], $args['<secondFile>'], $args['--format']));

@@ -2,55 +2,30 @@
 
 namespace Gendiff\Gendiff;
 
-use Funct\Strings;
-use Gendiff\Formats\Json;
-use Gendiff\Output\Pretty;
+use Gendiff\FormatParser;
+use Gendiff\Core;
+use Gendiff\Output;
 
-use function cli\line;
-
-function outputDiff($file1, $file2)
-{
-    $diff = compare($file1, $file2);
-    line($diff);
-}
-
-function compare($first, $second, $format = 'json')
+function compareFiles($first, $second, $format = 'pretty')
 {
     $file1 = readFile($first);
     $file2 = readFile($second);
-    $object1 = parseFormat($file1, $format);
-    $object2 = parseFormat($file2, $format);
-    $diff = Json\compare($object1, $object2);
-    return $diff;
+    $format1 = detectFormat($first);
+    $format2 = detectFormat($second);
+    $object1 = FormatParser\parse($file1, $format1);
+    $object2 = FormatParser\parse($file2, $format2);
+    $diff = Core\compare($object1, $object2);
+    return Output\format($diff, $format);
 }
 
 function readFile($file)
 {
-    $isCurrentDir = ! Strings\startsWith($file, '/') &&
-        ! Strings\startsWith($file, '~') &&
-        ! Strings\startsWith($file, '.');
-    if ($isCurrentDir) {
-        $filePath = "./$file";
-    } else {
-        $filePath = $file;
-    }
-    return file_get_contents($filePath);
+    $path = realpath($file);
+    return file_get_contents($path);
 }
 
-function parseFormat($data, $format)
+function detectFormat($file)
 {
-    switch ($format) {
-        case 'json':
-            return json_decode($data, true);
-    }
-    return null;
-}
-
-function printResult($data, $format)
-{
-    switch ($format) {
-        case 'pretty':
-            return Pretty\output($data);
-    }
-    return null;
+    $info = pathinfo($file);
+    return $info['extension'];
 }
