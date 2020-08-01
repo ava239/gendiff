@@ -2,7 +2,7 @@
 
 namespace Gendiff\Gendiff;
 
-use Gendiff\FormatParser;
+use Gendiff\Parsers;
 use Gendiff\Core;
 use Gendiff\Output;
 
@@ -12,8 +12,8 @@ function compareFiles($first, $second, $format = 'pretty')
     $file2 = readFile($second);
     $format1 = detectFormat($first);
     $format2 = detectFormat($second);
-    $object1 = FormatParser\parse($file1, $format1);
-    $object2 = FormatParser\parse($file2, $format2);
+    $object1 = Parsers\parse($file1, $format1);
+    $object2 = Parsers\parse($file2, $format2);
     $diff = Core\compare($object1, $object2);
     return Output\format($diff, $format);
 }

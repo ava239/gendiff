@@ -16,14 +16,15 @@
     "docopt/docopt": "^1.0",
     "phpunit/phpunit": "^9.2",
     "ext-json": "*",
-    "wp-cli/php-cli-tools": "^0.11.11"
+    "wp-cli/php-cli-tools": "^0.11.11",
+    "symfony/yaml": "^5.1"
   },
   "autoload": {
     "files": [
       "src/Gendiff.php",
       "src/Output.php",
       "src/Core.php",
-      "src/FormatParser.php",
+      "src/Parsers.php",
       "src/output/Pretty.php"
     ],
     "psr-4": {
