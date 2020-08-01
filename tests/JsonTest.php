@@ -19,6 +19,11 @@ class JsonTest extends TestCase
         $this->file2 = Gendiff\readFile('tests/fixtures/after.json');
     }
 
+    public function testMisc()
+    {
+        $this->assertEquals('json', Gendiff\detectFormat('tests/fixtures/before.json'));
+    }
+
     public function testPretty()
     {
         $data = [
@@ -34,6 +39,7 @@ class JsonTest extends TestCase
   + verbose: true
   - proxy: 123.234.53.22
 }';
+        $this->assertEquals('', Output\format($data, ''));
         $this->assertEquals($expected, Output\format($data, 'pretty'));
     }
 
@@ -44,6 +50,7 @@ class JsonTest extends TestCase
             "timeout" => 50,
             "proxy" => "123.234.53.22",
         ];
+        $this->assertEquals([], FormatParser\parse($this->file1, ''));
         $this->assertEquals($expected, FormatParser\parse($this->file1, 'json'));
     }
 
@@ -58,5 +65,16 @@ class JsonTest extends TestCase
         $data1 = FormatParser\parse($this->file1, 'json');
         $data2 = FormatParser\parse($this->file2, 'json');
         $this->assertEquals($expected, Core\compare($data1, $data2));
+    }
+
+    public function testWrapper()
+    {
+        $data1 = FormatParser\parse($this->file1, 'json');
+        $data2 = FormatParser\parse($this->file2, 'json');
+        $diff = Core\compare($data1, $data2);
+        $this->assertEquals(
+            Output\format($diff, 'pretty'),
+            Gendiff\compareFiles('tests/fixtures/before.json', 'tests/fixtures/after.json')
+        );
     }
 }

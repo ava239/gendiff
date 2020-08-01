@@ -8,5 +8,5 @@ function parse($data, $format)
         case 'json':
             return json_decode($data, true);
     }
-    return null;
+    return [];
 }

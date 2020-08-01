@@ -10,5 +10,5 @@ function format($data, $format)
         case 'pretty':
             return Pretty\output($data);
     }
-    return null;
+    return '';
 }
