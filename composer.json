@@ -25,7 +25,10 @@
       "src/Core.php",
       "src/FormatParser.php",
       "src/output/Pretty.php"
-    ]
+    ],
+    "psr-4": {
+      "Gendiff\\Tests\\": "tests"
+    }
   },
   "scripts": {
     "test": "phpunit tests",
