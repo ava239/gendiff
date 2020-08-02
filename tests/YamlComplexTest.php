@@ -4,27 +4,46 @@ namespace Gendiff\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Gendiff\Output;
+use Gendiff\Gendiff;
+use Gendiff\Parsers;
+use Gendiff\Core;
 
-class FormatTest extends TestCase
+class YamlComplexTest extends TestCase
 {
-    public function testPretty()
+    protected $yml1;
+    protected $yml2;
+
+    public function setUp(): void
     {
-        $data = [
-            'kept' => ['host' => 'hexlet.io'],
-            'changed' => ['timeout' => [50, 20]],
-            'added' => ['verbose' => true],
-            'removed' => ['proxy' => '123.234.53.22'],
+        $this->yml1 = Gendiff\readFile('tests/fixtures/before-complex.yml');
+        $this->yml2 = Gendiff\readFile('tests/fixtures/after-complex.yml');
+    }
+
+    public function testParse()
+    {
+        $expected = [
+            "common" => [
+                "setting1" => "Value 1",
+                "setting2" => "200",
+                "setting3" => true,
+                "setting6" => [
+                    "key" => "value",
+                ]
+            ],
+            "group1" => [
+                "baz" => "bas",
+                "foo" => "bar",
+            ],
+            "group2" => [
+                "abc" => "12345",
+            ],
         ];
-        $expected = '{
-    host: hexlet.io
-  - timeout: 50
-  + timeout: 20
-  + verbose: true
-  - proxy: 123.234.53.22
-}';
-        $this->assertEquals('', Output\format($data, ''));
-        $this->assertEquals($expected, Output\format($data, 'pretty'));
-        $data2 = [
+        $this->assertEquals($expected, Parsers\parse($this->yml1, 'yml'));
+    }
+
+    public function testDiff()
+    {
+        $expected = [
             'kept' => [
                 'common' => [
                     'kept' => [
@@ -72,31 +91,19 @@ class FormatTest extends TestCase
                 'removed' => [],
             ]],
         ];
-        $expected2 = '{
-    common: {
-        setting1: Value 1
-        setting3: true
-      + setting4: blah blah
-      + setting5: {
-            key5: value5
-        }
-      - setting2: 200
-      - setting6: {
-            key: value
-        }
+        $data1 = Parsers\parse($this->yml1, 'yml');
+        $data2 = Parsers\parse($this->yml2, 'yml');
+        $this->assertEquals($expected, Core\compare($data1, $data2));
     }
-    group1: {
-        foo: bar
-      - baz: bas
-      + baz: bars
-    }
-  + group3: {
-        fee: 100500
-    }
-  - group2: {
-        abc: 12345
-    }
-}';
-        $this->assertEquals($expected2, Output\format($data2, 'pretty'));
+
+    public function testWrapper()
+    {
+        $data1 = Parsers\parse($this->yml1, 'yml');
+        $data2 = Parsers\parse($this->yml2, 'yml');
+        $diff = Core\compare($data1, $data2);
+        $this->assertEquals(
+            Output\format($diff, 'pretty'),
+            Gendiff\compareFiles('tests/fixtures/before-complex.yml', 'tests/fixtures/after-complex.yml')
+        );
     }
 }

@@ -6,23 +6,41 @@ const OPERATIONS = [
     'kept' => ' ',
     'added' => '+',
     'removed' => '-',
+    'changed' => ' ',
 ];
 
-function output($data)
+function output($data, $depth = 0, $param = '')
 {
-    $result = "{\n";
+    $start = str_repeat('  ', $depth > 0 ? $depth * 2 - 1 : 0);
+    $end = str_repeat('  ', $depth > 0 ? $depth * 2 : 0);
+    $result = "$start{$param}{\n";
     foreach ($data as $op => $type) {
-        foreach ($type as $key => $change) {
+        $result .= outputType($type, $op, $depth + 1);
+    }
+    $result .= "$end}";
+    if ($depth > 0) {
+        $result .= "\n";
+    }
+    return $result;
+}
+
+function outputType($data, $type, $depth)
+{
+    $result = '';
+    $start = str_repeat('  ', $depth * 2 - 1);
+    foreach ($data as $key => $change) {
+        $operation = OPERATIONS[$type];
+        if (is_array($change) && isset($change['kept'])) {
+            $result .= output($change, $depth, "{$operation} {$key}: ");
+        } else {
             $value = is_bool($change) ? ($change ? 'true' : 'false') : $change;
-            if ($op !== 'changed') {
-                $operation = OPERATIONS[$op];
-                $result .= "  {$operation} {$key}: {$value}\n";
+            if ($type !== 'changed') {
+                $result .= "$start{$operation} {$key}: {$value}\n";
             } else {
-                $result .= "  - {$key}: {$value[0]}\n";
-                $result .= "  + {$key}: {$value[1]}\n";
+                $result .= "$start- {$key}: {$value[0]}\n";
+                $result .= "$start+ {$key}: {$value[1]}\n";
             }
         }
     }
-    $result .= "}";
     return $result;
 }

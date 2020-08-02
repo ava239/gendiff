@@ -10,20 +10,29 @@ function compare($a, $b)
     $changed2 = array_filter(array_keys($b), fn($x) => !in_array($x, $added) && !in_array($x, $removed));
     $changed = array_unique(array_merge($changed1, $changed2));
     $diff = array_reduce($changed, function ($acc, $i) use ($a, $b) {
-        if ($a[$i] === $b[$i]) {
-            $acc['kept'][$i] = $a[$i];
+        if (is_array($a[$i]) || $a[$i] === $b[$i]) {
+            $acc['kept'][$i] = innerCompare($a[$i], $b[$i]);
         } else {
-            $acc['changed'][$i] = [$a[$i], $b[$i]];
+            $acc['changed'][$i] = [innerCompare($a[$i], $b[$i]), innerCompare($b[$i], $a[$i])];
         }
         return $acc;
-    }, ['kept' => [], 'changed' => [], 'added' => [], 'removed' => []]);
+    }, ['kept' => [], 'changed' => [], 'removed' => [], 'added' => []]);
     $diff = array_reduce($added, function ($acc, $i) use ($a, $b) {
-        $acc['added'][$i] = $b[$i];
+        $acc['added'][$i] = innerCompare($b[$i], $b[$i]);
         return $acc;
     }, $diff);
     $diff = array_reduce($removed, function ($acc, $i) use ($a, $b) {
-        $acc['removed'][$i] = $a[$i];
+        $acc['removed'][$i] = innerCompare($a[$i], $a[$i]);
         return $acc;
     }, $diff);
     return $diff;
+}
+
+function innerCompare($e, $e2)
+{
+    if (is_array($e) && is_array($e2)) {
+        return compare($e, $e2);
+    } else {
+        return $e;
+    }
 }

@@ -11,7 +11,19 @@ function parse($data, $format)
             return json_decode($data, true);
         case 'yml':
             $object = Yaml::parse($data, Yaml::PARSE_OBJECT_FOR_MAP);
-            return (array) $object;
+            $object = convertToArray($object);
+            return $object;
     }
     return [];
+}
+
+function convertToArray($object)
+{
+    if (is_object($object)) {
+        $object = (array) $object;
+        foreach ($object as $key => $val) {
+            $object[$key] = convertToArray($val);
+        }
+    }
+    return $object;
 }
