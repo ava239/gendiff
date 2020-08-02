@@ -4,8 +4,4 @@
 [![Test Coverage](https://api.codeclimate.com/v1/badges/25ef186196e3546e1b1a/test_coverage)](https://codeclimate.com/github/ava239/php-project-lvl2/test_coverage)
 
 ## Usage
-help and xml diff
-[![asciicast](https://asciinema.org/a/350477.svg)](https://asciinema.org/a/350477)
-
-yml diff
-[![asciicast](https://asciinema.org/a/351099.svg)](https://asciinema.org/a/351099)
+[![asciicast](https://asciinema.org/a/351109.svg)](https://asciinema.org/a/351109)
