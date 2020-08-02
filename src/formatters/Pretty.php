@@ -1,6 +1,6 @@
 <?php
 
-namespace Gendiff\Output\Pretty;
+namespace Gendiff\Formatters\Pretty;
 
 const OPERATIONS = [
     'kept' => ' ',

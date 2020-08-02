@@ -7,6 +7,17 @@ use Gendiff\Output;
 
 class FormatTest extends TestCase
 {
+    public function testEmpty()
+    {
+        $data = [
+            'kept' => ['host' => 'hexlet.io'],
+            'changed' => ['timeout' => [50, 20]],
+            'added' => ['verbose' => true],
+            'removed' => ['proxy' => '123.234.53.22'],
+        ];
+        $this->assertEquals('', Output\format($data, ''));
+    }
+
     public function testPretty()
     {
         $data = [
@@ -22,7 +33,6 @@ class FormatTest extends TestCase
   + verbose: true
   - proxy: 123.234.53.22
 }';
-        $this->assertEquals('', Output\format($data, ''));
         $this->assertEquals($expected, Output\format($data, 'pretty'));
         $data2 = [
             'kept' => [
@@ -98,5 +108,65 @@ class FormatTest extends TestCase
     }
 }';
         $this->assertEquals($expected2, Output\format($data2, 'pretty'));
+    }
+
+    public function testPlain()
+    {
+        $data = [
+            'kept' => [
+                'common' => [
+                    'kept' => [
+                        'setting1' => 'Value 1',
+                        'setting3' => true
+                    ],
+                    'changed' => [],
+                    'added' => [
+                        'setting4' => 'blah blah',
+                        'setting5' => [
+                            'kept' => ['key5' => 'value5'],
+                            'changed' => [],
+                            'added' => [],
+                            'removed' => [],
+                        ],
+                    ],
+                    'removed' => [
+                        'setting2' => '200',
+                        'setting6' => [
+                            'kept' => ['key' => 'value'],
+                            'changed' => [],
+                            'added' => [],
+                            'removed' => [],
+                        ]
+                    ],
+                ],
+                'group1' => [
+                    'kept' => ['foo' => 'bar'],
+                    'changed' => ['baz' => ['bas', 'bars']],
+                    'added' => [],
+                    'removed' => [],
+                ]
+            ],
+            'changed' => [],
+            'added' => ['group3' => [
+                'kept' => ['fee' => '100500'],
+                'changed' => [],
+                'added' => [],
+                'removed' => [],
+            ]],
+            'removed' => ['group2' => [
+                'kept' => ['abc' => '12345'],
+                'changed' => [],
+                'added' => [],
+                'removed' => [],
+            ]],
+        ];
+        $expected = "Property 'common.setting4' was added with value: 'blah blah'
+Property 'common.setting5' was added with value: 'complex value'
+Property 'common.setting2' was removed
+Property 'common.setting6' was removed
+Property 'group1.baz' was changed. From 'bas' to 'bars'
+Property 'group3' was added with value: 'complex value'
+Property 'group2' was removed";
+        $this->assertEquals($expected, Output\format($data, 'plain'));
     }
 }
