@@ -9,3 +9,6 @@ pretty print
 
 plain diff
 [![asciicast](https://asciinema.org/a/351261.svg)](https://asciinema.org/a/351261)
+
+json format output
+[![asciicast](https://asciinema.org/a/351467.svg)](https://asciinema.org/a/351467)
