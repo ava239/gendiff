@@ -4,14 +4,22 @@ namespace Gendiff\Output;
 
 use Gendiff\Formatters\Pretty;
 use Gendiff\Formatters\Plain;
+use Gendiff\Formatters\Json;
 
 function format($data, $format)
 {
     switch ($format) {
         case 'pretty':
-            return Pretty\output($data);
+            return joinLines(Pretty\output($data));
         case 'plain':
-            return Plain\output($data);
+            return joinLines(Plain\output($data));
+        case 'json':
+            return joinLines(Json\output($data));
     }
     return '';
+}
+
+function joinLines($lines)
+{
+    return implode("\n", $lines);
 }

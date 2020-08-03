@@ -6,6 +6,7 @@ use Gendiff\Parsers;
 use Gendiff\Core;
 use Gendiff\Output;
 use Docopt;
+
 use function cli\line;
 
 function run()

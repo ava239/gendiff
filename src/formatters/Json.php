@@ -1,6 +1,6 @@
 <?php
 
-namespace Gendiff\Formatters\Plain;
+namespace Gendiff\Formatters\Json;
 
 function output($data, $depth = 0, $prefix = '')
 {

@@ -3,42 +3,55 @@
 namespace Gendiff\Formatters\Pretty;
 
 const OPERATIONS = [
-    'kept' => ' ',
-    'added' => '+',
-    'removed' => '-',
-    'changed' => ' ',
-];
+    'kept' => '  ',
+    'added' => '+ ',
+    'removed' => '- ',
+    'changed' => '  ',
+],
+MARGIN = '  ';
 
-function output($data, $depth = 0, $param = '')
+function output($data, $depth = 0, $prefix = '')
 {
-    $start = str_repeat('  ', $depth > 0 ? $depth * 2 - 1 : 0);
-    $end = str_repeat('  ', $depth > 0 ? $depth * 2 : 0);
-    $result = "$start{$param}{\n";
+    $result = [];
+    $start = $depth > 0 ? str_repeat(MARGIN, $depth * 2 - 1) : '';
+    $end = $depth > 0 ? $start . MARGIN : '';
     foreach ($data as $op => $type) {
-        $result .= outputType($type, $op, $depth + 1);
+        $result = [
+            ...$result,
+            ...outputType($type, $op, $depth),
+        ];
     }
-    $result .= "$end}";
-    if ($depth > 0) {
-        $result .= "\n";
-    }
+    $result = [
+        "$start{$prefix}{",
+        ...$result,
+        "$end}",
+    ];
     return $result;
 }
 
 function outputType($data, $type, $depth)
 {
-    $result = '';
-    $start = str_repeat('  ', $depth * 2 - 1);
+    $result = [];
+    $start = str_repeat(MARGIN, $depth * 2 + 1);
     foreach ($data as $key => $change) {
         $operation = OPERATIONS[$type];
         if (is_array($change) && isset($change['kept'])) {
-            $result .= output($change, $depth, "{$operation} {$key}: ");
+            $result = [
+                ...$result,
+                ...output($change, $depth + 1, "{$operation}{$key}: "),
+            ];
         } else {
             $value = is_bool($change) ? ($change ? 'true' : 'false') : $change;
-            if ($type !== 'changed') {
-                $result .= "$start{$operation} {$key}: {$value}\n";
-            } else {
-                $result .= "$start- {$key}: {$value[0]}\n";
-                $result .= "$start+ {$key}: {$value[1]}\n";
+            switch ($type) {
+                case 'kept':
+                case 'added':
+                case 'removed':
+                    $result[] = "$start{$operation}$key: $value";
+                    break;
+                case 'changed':
+                    $result[] = "$start- $key: {$value[0]}";
+                    $result[] = "$start+ $key: {$value[1]}";
+                    break;
             }
         }
     }
