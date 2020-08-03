@@ -5,29 +5,6 @@ namespace Gendiff\Gendiff;
 use Gendiff\Parsers;
 use Gendiff\Core;
 use Gendiff\Output;
-use Docopt;
-
-use function cli\line;
-
-function run()
-{
-    $doc = <<<DOC
-Generate diff
-
-Usage:
-  gendiff (-h|--help)
-  gendiff (-v|--version)
-  gendiff [--format <fmt>] <firstFile> <secondFile>
-
-Options:
-  -h --help                     Show this screen
-  -v --version                  Show version
-  --format <fmt>                Report format [default: pretty]
-DOC;
-    $args = Docopt::handle($doc);
-
-    line(compareFiles($args['<firstFile>'], $args['<secondFile>'], $args['--format']));
-}
 
 function compareFiles($first, $second, $format = 'pretty')
 {

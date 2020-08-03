@@ -14,7 +14,7 @@ function format($data, $format)
         case 'plain':
             return joinLines(Plain\output($data));
         case 'json':
-            return joinLines(Json\output($data));
+            return json_encode(Json\output($data));
     }
     return '';
 }

@@ -21,11 +21,7 @@ function output($data, $depth = 0, $prefix = '')
             ...outputType($type, $op, $depth),
         ];
     }
-    $result = [
-        "$start{$prefix}{",
-        ...$result,
-        "$end}",
-    ];
+    $result = ["$start{$prefix}{", ...$result, "$end}"];
     return $result;
 }
 

@@ -2,37 +2,31 @@
 
 namespace Gendiff\Formatters\Json;
 
-function output($data, $depth = 0, $prefix = '')
+function output($data, $depth = 0)
 {
-    $result = [];
-    foreach ($data as $op => $type) {
-        $result = [...$result, ...outputType($type, $prefix, $op, $depth + 1)];
-    }
-    return $result;
+    return array_reduce(array_keys($data), function ($acc, $i) use ($data, $depth) {
+        $type = $data[$i];
+        return array_merge($acc, outputType($type, $i, $depth));
+    }, []);
 }
 
-function outputType($data, $prefix, $type, $depth)
+function outputType($data, $type, $depth)
 {
-    $result = [];
-    foreach ($data as $key => $change) {
-        $fullkey = ($prefix ? "$prefix." : "") . $key;
-        if (is_array($change) && isset($change['kept']) && !in_array($type, ['added', 'removed'])) {
-            $result = [...$result, ...output($change, $depth, $fullkey)];
+    return array_reduce(array_keys($data), function ($acc, $i) use ($data, $depth, $type) {
+        $change = $data[$i];
+        if (is_array($change) && isset($change['kept'])) {
+            return array_merge($acc, [
+                $i => [
+                    'value' => output($change, $depth + 1),
+                    'type' => $type,
+                ]
+            ]);
         } else {
-            $value = is_bool($change) ? ($change ? 'true' : 'false') : $change;
-            switch ($type) {
-                case 'added':
-                    $value = is_array($value) ? 'complex value' : $value;
-                    $result[] = "Property '$fullkey' was added with value: '{$value}'";
-                    break;
-                case 'removed':
-                    $result[] = "Property '$fullkey' was removed";
-                    break;
-                case 'changed':
-                    $result[] = "Property '$fullkey' was changed. From '{$value[0]}' to '{$value[1]}'";
-                    break;
+            if ($type === 'changed') {
+                return array_merge($acc, [$i => ['value' => $change[1], 'old' => $change[0], 'type' => $type]]);
+            } else {
+                return array_merge($acc, [$i => ['value' => $change, 'type' => $type]]);
             }
         }
-    }
-    return $result;
+    }, []);
 }
