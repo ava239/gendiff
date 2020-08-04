@@ -26,3 +26,9 @@ DOC;
 $args = Docopt::handle($doc);
 
 echo Gendiff\Gendiff\compareFiles($args['<firstFile>'], $args['<secondFile>'], $args['--format']);
+
+/* TODO switch default (exception)
+ * TODO remove recursion depth argument
+ * TODO read/parse exceptions
+ * TODO inner representation as tree
+*/
