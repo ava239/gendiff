@@ -4,35 +4,34 @@ namespace Gendiff\Formatters\Plain;
 
 function output($data, $depth = 0, $prefix = '')
 {
-    $result = [];
-    foreach ($data as $op => $type) {
-        $result = [...$result, ...outputType($type, $prefix, $op, $depth + 1)];
-    }
-    return $result;
+    return array_reduce(array_keys($data), function ($acc, $type) use ($data, $depth, $prefix) {
+        $operations = $data[$type];
+        return [...$acc, ...outputType($operations, $prefix, $type, $depth + 1)];
+    }, []);
 }
 
 function outputType($data, $prefix, $type, $depth)
 {
-    $result = [];
-    foreach ($data as $key => $change) {
-        $fullkey = ($prefix ? "$prefix." : "") . $key;
-        if (is_array($change) && isset($change['kept']) && !in_array($type, ['added', 'removed'])) {
-            $result = [...$result, ...output($change, $depth, $fullkey)];
+    return array_reduce(array_keys($data), function ($acc, $key) use ($data, $prefix, $type, $depth) {
+        $value = $data[$key];
+        $name = ($prefix ? "$prefix." : "") . $key;
+        if (is_array($value) && isset($value['kept']) && !in_array($type, ['added', 'removed'])) {
+            return [...$acc, ...output($value, $depth, $name)];
         } else {
-            $value = is_bool($change) ? ($change ? 'true' : 'false') : $change;
+            if (is_bool($value)) {
+                $value = $value ? 'true' : 'false';
+            }
             switch ($type) {
                 case 'added':
                     $value = is_array($value) ? 'complex value' : $value;
-                    $result[] = "Property '$fullkey' was added with value: '{$value}'";
-                    break;
+                    return [...$acc, "Property '$name' was added with value: '{$value}'"];
                 case 'removed':
-                    $result[] = "Property '$fullkey' was removed";
-                    break;
+                    return [...$acc, "Property '$name' was removed"];
                 case 'changed':
-                    $result[] = "Property '$fullkey' was changed. From '{$value[0]}' to '{$value[1]}'";
-                    break;
+                    return [...$acc, "Property '$name' was changed. From '{$value[0]}' to '{$value[1]}'"];
+                default:
+                    return $acc;
             }
         }
-    }
-    return $result;
+    }, []);
 }

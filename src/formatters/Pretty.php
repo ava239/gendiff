@@ -12,44 +12,39 @@ MARGIN = '  ';
 
 function output($data, $depth = 0, $prefix = '')
 {
-    $result = [];
-    $start = $depth > 0 ? str_repeat(MARGIN, $depth * 2 - 1) : '';
-    $end = $depth > 0 ? $start . MARGIN : '';
-    foreach ($data as $op => $type) {
-        $result = [
-            ...$result,
-            ...outputType($type, $op, $depth),
-        ];
+    $start = '';
+    if ($depth > 0) {
+        $start = str_repeat(MARGIN, $depth * 2 - 1);
     }
-    $result = ["$start{$prefix}{", ...$result, "$end}"];
-    return $result;
+    $end = str_repeat(MARGIN, $depth * 2);
+    $lines = array_reduce(array_keys($data), function ($acc, $type) use ($data, $depth) {
+        $operations = $data[$type];
+        return [...$acc, ...outputType($operations, $type, $depth)];
+    }, []);
+    return ["$start{$prefix}{", ...$lines, "$end}"];
 }
 
 function outputType($data, $type, $depth)
 {
-    $result = [];
-    $start = str_repeat(MARGIN, $depth * 2 + 1);
-    foreach ($data as $key => $change) {
+    $spaces = str_repeat(MARGIN, $depth * 2 + 1);
+    return array_reduce(array_keys($data), function ($acc, $key) use ($data, $type, $depth, $spaces) {
         $operation = OPERATIONS[$type];
-        if (is_array($change) && isset($change['kept'])) {
-            $result = [
-                ...$result,
-                ...output($change, $depth + 1, "{$operation}{$key}: "),
-            ];
+        $value = $data[$key];
+        if (is_array($value) && isset($value['kept'])) {
+            return [...$acc, ...output($value, $depth + 1, "{$operation}{$key}: ")];
         } else {
-            $value = is_bool($change) ? ($change ? 'true' : 'false') : $change;
+            if (is_bool($value)) {
+                $value = $value ? 'true' : 'false';
+            }
             switch ($type) {
+                case 'changed':
+                    return [...$acc, "$spaces- $key: {$value[0]}", "$spaces+ $key: {$value[1]}"];
                 case 'kept':
                 case 'added':
                 case 'removed':
-                    $result[] = "$start{$operation}$key: $value";
-                    break;
-                case 'changed':
-                    $result[] = "$start- $key: {$value[0]}";
-                    $result[] = "$start+ $key: {$value[1]}";
-                    break;
+                default:
+                    return [...$acc, "$spaces{$operation}$key: $value"];
             }
         }
-    }
-    return $result;
+    }, []);
 }

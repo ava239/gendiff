@@ -21,9 +21,7 @@ function convertToArray($object)
 {
     if (is_object($object)) {
         $object = (array) $object;
-        foreach ($object as $key => $val) {
-            $object[$key] = convertToArray($val);
-        }
+        $object = array_map('Gendiff\Parsers\convertToArray', $object);
     }
     return $object;
 }
