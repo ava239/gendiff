@@ -3,27 +3,27 @@
 namespace Gendiff\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Gendiff\Gendiff;
 use Gendiff\Output;
 
-class FormatTest extends TestCase
+class DiffTest extends TestCase
 {
-    protected $data;
-    protected $data2;
+    protected $diff;
 
     public function setUp(): void
     {
-        $this->data = [
-            'kept' => ['host' => 'hexlet.io'],
-            'changed' => ['timeout' => [50, 20]],
-            'added' => ['verbose' => true],
-            'removed' => ['proxy' => '123.234.53.22'],
-        ];
-        $this->data2 = [
+        $this->diff = [
             'kept' => [
                 'common' => [
                     'kept' => [
                         'setting1' => 'Value 1',
-                        'setting3' => true
+                        'setting3' => true,
+                        'setting9' => [
+                            'kept' => [],
+                            'changed' => [],
+                            'added' => ['keys' => '1'],
+                            'removed' => [],
+                        ],
                     ],
                     'changed' => [],
                     'added' => [
@@ -42,7 +42,7 @@ class FormatTest extends TestCase
                             'changed' => [],
                             'added' => [],
                             'removed' => [],
-                        ]
+                        ],
                     ],
                 ],
                 'group1' => [
@@ -68,25 +68,39 @@ class FormatTest extends TestCase
         ];
     }
 
-    public function testEmpty()
+    /**
+     * @dataProvider filepathProvider
+     */
+    public function testDiff($filepath1, $filepath2)
     {
-        $this->assertEquals('', Output\format($this->data, ''));
+        $this->assertEquals($this->diff, Gendiff\diffFiles($filepath1, $filepath2));
     }
 
-    public function testPretty()
+    public function filepathProvider()
     {
-        $expected = '{
-    host: hexlet.io
-  - timeout: 50
-  + timeout: 20
-  + verbose: true
-  - proxy: 123.234.53.22
-}';
-        $this->assertEquals($expected, Output\format($this->data, 'pretty'));
-        $expected2 = '{
+        return [
+            'json' => ['tests/fixtures/before-complex.json', 'tests/fixtures/after-complex.json'],
+            'yaml' => ['tests/fixtures/before-complex.yml', 'tests/fixtures/after-complex.yml'],
+        ];
+    }
+
+    /**
+     * @dataProvider formatterProvider
+     */
+    public function testFormatters($expectedOutput, $format)
+    {
+        $this->assertEquals($expectedOutput, Output\format($this->diff, $format));
+    }
+
+    public function formatterProvider()
+    {
+        $pretty = '{
     common: {
         setting1: Value 1
         setting3: true
+        setting9: {
+          + keys: 1
+        }
       + setting4: blah blah
       + setting5: {
             key5: value5
@@ -108,28 +122,22 @@ class FormatTest extends TestCase
         abc: 12345
     }
 }';
-        $this->assertEquals($expected2, Output\format($this->data2, 'pretty'));
-    }
-
-    public function testPlain()
-    {
-        $expected = "Property 'common.setting4' was added with value: 'blah blah'
+        $plain = "Property 'common.setting9.keys' was added with value: '1'
+Property 'common.setting4' was added with value: 'blah blah'
 Property 'common.setting5' was added with value: 'complex value'
 Property 'common.setting2' was removed
 Property 'common.setting6' was removed
 Property 'group1.baz' was changed. From 'bas' to 'bars'
 Property 'group3' was added with value: 'complex value'
 Property 'group2' was removed";
-        $this->assertEquals($expected, Output\format($this->data2, 'plain'));
-    }
-
-    public function testJson()
-    {
-        $e2 = [
+        $json = json_encode([
             'common' => [
                 'value' => [
                     'setting1' => ['value' => 'Value 1', 'type' => 'kept'],
                     'setting3' => ['value' => true, 'type' => 'kept'],
+                    'setting9' => ['value' => [
+                        'keys' => ['value' => '1', 'type' => 'added'],
+                    ], 'type' => 'kept'],
                     'setting4' => [
                         'value' => 'blah blah',
                         'type' => 'added',
@@ -172,7 +180,11 @@ Property 'group2' was removed";
                 ],
                 'type' => 'removed',
             ]
+        ]);
+        return [
+            [$pretty, 'pretty'],
+            [$plain, 'plain'],
+            [$json, 'json'],
         ];
-        $this->assertEquals(json_encode($e2), Output\format($this->data2, 'json'));
     }
 }

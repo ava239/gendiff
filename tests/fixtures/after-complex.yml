@@ -4,6 +4,8 @@ common:
   setting4: "blah blah"
   setting5:
     key5: "value5"
+  setting9:
+    keys: 1
 group1:
   foo: "bar"
   baz: "bars"
