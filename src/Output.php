@@ -2,6 +2,7 @@
 
 namespace Gendiff\Output;
 
+use Error;
 use Gendiff\Formatters\Pretty;
 use Gendiff\Formatters\Plain;
 use Gendiff\Formatters\Json;
@@ -15,8 +16,9 @@ function format($data, $format)
             return joinLines(Plain\output($data));
         case 'json':
             return json_encode(Json\output($data));
+        default:
+            throw new Error("Unknown format '$format}'");
     }
-    return '';
 }
 
 function joinLines($lines)
