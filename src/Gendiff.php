@@ -38,35 +38,25 @@ function detectFormat(string $file): string
 
 function getDiff(array $data1, array $data2): array
 {
-    $dataKeys = array_merge(array_keys($data1), array_keys($data2));
-    $removed = array_filter($dataKeys, fn($key) => !in_array($key, array_keys($data2)));
-    $added = array_filter($dataKeys, fn($key) => !in_array($key, array_keys($data1)));
-    $changed = array_filter($dataKeys, fn($key) => !in_array($key, $added) && !in_array($key, $removed));
-    $innerCompare = function ($data1, $data2) {
-        if (is_array($data1) && is_array($data2)) {
-            return getDiff($data1, $data2);
-        } else {
-            return $data1;
+    $dataKeys = array_unique(array_merge(array_keys($data1), array_keys($data2)));
+    return array_reduce($dataKeys, function ($acc, $key) use ($data1, $data2) {
+        $elem1 = $data1[$key] ?? null;
+        $elem2 = $data2[$key] ?? null;
+        if ($elem1 === $elem2) {
+            return [...$acc, ['key' => $key, 'value' => $elem2, 'type' => 'notChanged']];
         }
-    };
-    $diff = array_reduce($changed, function ($acc, $index) use ($data1, $data2, $innerCompare) {
-        if (is_array($data1[$index]) || $data1[$index] === $data2[$index]) {
-            $acc['kept'][$index] = $innerCompare($data1[$index], $data2[$index]);
-        } else {
-            $acc['changed'][$index] = [
-                $innerCompare($data1[$index], $data2[$index]),
-                $innerCompare($data2[$index], $data1[$index])
+        if (is_null($elem1)) {
+            return [...$acc, ['key' => $key, 'value' => $elem2, 'type' => 'added']];
+        }
+        if (is_null($elem2)) {
+            return [...$acc, ['key' => $key, 'value' => $elem1, 'type' => 'removed']];
+        }
+        if (is_array($elem1) && is_array($elem2)) {
+            return [
+                ...$acc,
+                ['key' => $key, 'value' => 'complex value', 'type' => 'complex', 'children' => getDiff($elem1, $elem2)]
             ];
         }
-        return $acc;
-    }, ['kept' => [], 'changed' => [], 'removed' => [], 'added' => []]);
-    $diff = array_reduce($added, function ($acc, $index) use ($data1, $data2, $innerCompare) {
-        $acc['added'][$index] = $innerCompare($data2[$index], $data2[$index]);
-        return $acc;
-    }, $diff);
-    $diff = array_reduce($removed, function ($acc, $index) use ($data1, $data2, $innerCompare) {
-        $acc['removed'][$index] = $innerCompare($data1[$index], $data1[$index]);
-        return $acc;
-    }, $diff);
-    return $diff;
+        return [...$acc, ['key' => $key, 'value' => $elem2, 'old' => $elem1, 'type' => 'changed']];
+    }, []);
 }
