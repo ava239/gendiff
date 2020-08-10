@@ -7,21 +7,16 @@ use Gendiff\Formatters\Pretty;
 use Gendiff\Formatters\Plain;
 use Gendiff\Formatters\Json;
 
-function format($data, $format)
+function format(array $data, string $format): string
 {
     switch ($format) {
         case 'pretty':
-            return joinLines(Pretty\output($data));
+            return implode("\n", Pretty\output($data));
         case 'plain':
-            return joinLines(Plain\output($data));
+            return implode("\n", Plain\output($data));
         case 'json':
             return json_encode(Json\output($data));
         default:
-            throw new Error("Unknown format '$format}'");
+            throw new Error("Unknown format '$format'");
     }
-}
-
-function joinLines($lines)
-{
-    return implode("\n", $lines);
 }
