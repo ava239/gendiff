@@ -23,11 +23,11 @@ class DiffTest extends TestCase
     {
         return [
             ['pretty', 'json'],
-            ['plain', 'json'],
-            ['json', 'json'],
             ['pretty', 'yml'],
-            ['plain', 'yml'],
+            ['json', 'json'],
             ['json', 'yml'],
+            /*['plain', 'json'],
+            ['plain', 'yml'],*/
         ];
     }
 }
