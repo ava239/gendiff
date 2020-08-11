@@ -26,8 +26,8 @@ class DiffTest extends TestCase
             ['pretty', 'yml'],
             ['json', 'json'],
             ['json', 'yml'],
-            /*['plain', 'json'],
-            ['plain', 'yml'],*/
+            ['plain', 'json'],
+            ['plain', 'yml'],
         ];
     }
 }

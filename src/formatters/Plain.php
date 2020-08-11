@@ -2,36 +2,34 @@
 
 namespace Gendiff\Formatters\Plain;
 
-function output($data, $depth = 0, $prefix = '')
+function format(array $data): string
 {
-    return array_reduce(array_keys($data), function ($acc, $type) use ($data, $depth, $prefix) {
-        $operations = $data[$type];
-        return [...$acc, ...outputType($operations, $prefix, $type, $depth + 1)];
-    }, []);
-}
-
-function outputType($data, $prefix, $type, $depth)
-{
-    return array_reduce(array_keys($data), function ($acc, $key) use ($data, $prefix, $type, $depth) {
-        $value = $data[$key];
-        $name = ($prefix ? "$prefix." : "") . $key;
-        if (is_array($value) && isset($value['kept']) && !in_array($type, ['added', 'removed'])) {
-            return [...$acc, ...output($value, $depth, $name)];
-        } else {
-            if (is_bool($value)) {
-                $value = $value ? 'true' : 'false';
-            }
-            switch ($type) {
-                case 'added':
-                    $value = is_array($value) ? 'complex value' : $value;
-                    return [...$acc, "Property '$name' was added with value: '{$value}'"];
-                case 'removed':
-                    return [...$acc, "Property '$name' was removed"];
-                case 'changed':
-                    return [...$acc, "Property '$name' was changed. From '{$value[0]}' to '{$value[1]}'"];
-                default:
-                    return $acc;
-            }
+    $iter = function ($elem, $current, $prefix = '') use (&$iter) {
+        if (isset($elem['children'])) {
+            return array_reduce(
+                $elem['children'],
+                fn($acc, $item) => [...$acc, ...$iter($item, [], "$prefix{$elem['key']}.")],
+                $current
+            );
         }
-    }, []);
+        if (is_bool($elem['value'])) {
+            $elem['value'] = $elem['value'] ? 'true' : 'false';
+        }
+        switch ($elem['type']) {
+            case 'added':
+                $value = is_array($elem['value']) ? 'complex value' : $elem['value'];
+                return [...$current, "Property '$prefix{$elem['key']}' was added with value: '{$value}'"];
+            case 'removed':
+                return [...$current, "Property '$prefix{$elem['key']}' was removed"];
+            case 'changed':
+                return [
+                    ...$current,
+                    "Property '$prefix{$elem['key']}' was changed. From '{$elem['old']}' to '{$elem['value']}'"
+                ];
+            default:
+                return $current;
+        }
+    };
+    $lines = array_reduce($data, fn($acc, $elem) => [...$acc, ...$iter($elem, [])], []);
+    return implode("\n", $lines);
 }

@@ -2,40 +2,39 @@
 
 namespace Gendiff\Formatters\Pretty;
 
-const OPERATIONS = [
+const OPERATION_PREFIXES = [
     'kept' => '  ',
     'added' => '+ ',
     'removed' => '- ',
     'changed' => '  ',
 ],
-MARGIN = '  ';
+INDENT_STEP = '    ';
 
-function output($data)
+function format(array $data): string
 {
-    $iter = function ($elem, $current, $depth = 0) use (&$iter, $data) {
-        $spaces = str_repeat(MARGIN, $depth * 2 + 1);
+    $iter = function ($elem, $current, $depth = 0) use (&$iter) {
+        $indent = str_repeat(INDENT_STEP, $depth) . '  ';
         if (isset($elem['children'])) {
             return [
-                "$spaces  {$elem['key']}: {",
+                "$indent  {$elem['key']}: {",
                 ...array_reduce(
                     $elem['children'],
-                    fn($acc, $i) => [...$acc, ...$iter($i, $current, $depth + 1)],
+                    fn($acc, $item) => [...$acc, ...$iter($item, $current, $depth + 1)],
                     []
                 ),
-                "$spaces  }"
+                "$indent  }"
             ];
         }
-        $operation = OPERATIONS[$elem['type']];
+        $operation = OPERATION_PREFIXES[$elem['type']];
         if (is_array($elem['value'])) {
             return [
                 ...$current,
-                "$spaces{$operation}{$elem['key']}: {",
-                ...array_reduce(
-                    array_keys($elem['value']),
-                    fn($acc, $i) => [...$acc, "$spaces      {$i}: {$elem['value'][$i]}"],
-                    []
+                "$indent{$operation}{$elem['key']}: {",
+                ...array_map(
+                    fn($key) => "$indent      {$key}: {$elem['value'][$key]}",
+                    array_keys($elem['value'])
                 ),
-                "$spaces  }"
+                "$indent  }"
             ];
         }
         if (is_bool($elem['value'])) {
@@ -45,15 +44,16 @@ function output($data)
             case 'changed':
                 return [
                     ...$current,
-                    "$spaces- {$elem['key']}: {$elem['old']}",
-                    "$spaces+ {$elem['key']}: {$elem['value']}"
+                    "$indent- {$elem['key']}: {$elem['old']}",
+                    "$indent+ {$elem['key']}: {$elem['value']}"
                 ];
             case 'kept':
             case 'added':
             case 'removed':
             default:
-                return [...$current, "$spaces{$operation}{$elem['key']}: {$elem['value']}"];
+                return [...$current, "$indent{$operation}{$elem['key']}: {$elem['value']}"];
         }
     };
-    return ["{", ...array_reduce($data, fn($acc, $elem) => [...$acc, ...$iter($elem, [])], []), "}"];
+    $lines = ["{", ...array_reduce($data, fn($acc, $item) => [...$acc, ...$iter($item, [])], []), "}"];
+    return implode("\n", $lines);
 }
