@@ -2,7 +2,7 @@
 
 namespace Gendiff\Parsers;
 
-use Error;
+use Exception;
 use Symfony\Component\Yaml\Yaml;
 
 function parse(string $data, string $format): array
@@ -14,6 +14,6 @@ function parse(string $data, string $format): array
         case 'yml':
             return Yaml::parse($data);
         default:
-            throw new Error("Unsupported file extension '$format'");
+            throw new Exception("Unsupported file extension '$format'");
     }
 }

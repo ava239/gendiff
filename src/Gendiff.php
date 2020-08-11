@@ -2,7 +2,7 @@
 
 namespace Gendiff\Gendiff;
 
-use Error;
+use Exception;
 use Gendiff\Parsers;
 use Gendiff\Output;
 
@@ -22,10 +22,10 @@ function readFile(string $file): string
 {
     $path = realpath($file);
     if (!is_file($path)) {
-        throw new Error("'$file' is not a file");
+        throw new Exception("'$file' is not a file");
     }
     if (!is_readable($path)) {
-        throw new Error("Can`t read '$file'");
+        throw new Exception("Can`t read '$file'");
     }
     return file_get_contents($path);
 }

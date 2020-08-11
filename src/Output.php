@@ -2,7 +2,7 @@
 
 namespace Gendiff\Output;
 
-use Error;
+use Exception;
 use Gendiff\Formatters\Pretty;
 use Gendiff\Formatters\Plain;
 use Gendiff\Formatters\Json;
@@ -11,12 +11,12 @@ function format(array $data, string $format): string
 {
     switch ($format) {
         case 'pretty':
-            return implode("\n", Pretty\output($data));
+            return Pretty\format($data);
         case 'plain':
-            return implode("\n", Plain\output($data));
+            return Plain\format($data);
         case 'json':
-            return json_encode(Json\output($data));
+            return Json\format($data);
         default:
-            throw new Error("Unknown format '$format'");
+            throw new Exception("Unknown format '$format'");
     }
 }
