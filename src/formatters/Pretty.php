@@ -2,6 +2,8 @@
 
 namespace Gendiff\Formatters\Pretty;
 
+use function Gendiff\Output\formatValue;
+
 const OPERATION_PREFIXES = [
     'kept' => '  ',
     'added' => '+ ',
@@ -31,27 +33,25 @@ function format(array $data): string
                 ...$current,
                 "$indent{$operation}{$elem['key']}: {",
                 ...array_map(
-                    fn($key) => "$indent      {$key}: {$elem['value'][$key]}",
+                    fn($key) => "$indent      {$key}: " . formatValue($elem['value'][$key]),
                     array_keys($elem['value'])
                 ),
                 "$indent  }"
             ];
         }
-        if (is_bool($elem['value'])) {
-            $elem['value'] = $elem['value'] ? 'true' : 'false';
-        }
         switch ($elem['type']) {
             case 'changed':
+                [$old, $new] = array_map('Gendiff\Output\formatValue', [$elem['old'], $elem['value']]);
                 return [
                     ...$current,
-                    "$indent- {$elem['key']}: {$elem['old']}",
-                    "$indent+ {$elem['key']}: {$elem['value']}"
+                    "$indent- {$elem['key']}: $old",
+                    "$indent+ {$elem['key']}: $new"
                 ];
             case 'kept':
             case 'added':
             case 'removed':
             default:
-                return [...$current, "$indent{$operation}{$elem['key']}: {$elem['value']}"];
+                return [...$current, "$indent{$operation}{$elem['key']}: " . formatValue($elem['value'])];
         }
     };
     $lines = ["{", ...array_reduce($data, fn($acc, $item) => [...$acc, ...$iter($item, [])], []), "}"];

@@ -2,6 +2,8 @@
 
 namespace Gendiff\Formatters\Plain;
 
+use function Gendiff\Output\formatValue;
+
 function format(array $data): string
 {
     $iter = function ($elem, $current, $prefix = '') use (&$iter) {
@@ -12,19 +14,20 @@ function format(array $data): string
                 $current
             );
         }
-        if (is_bool($elem['value'])) {
-            $elem['value'] = $elem['value'] ? 'true' : 'false';
-        }
         switch ($elem['type']) {
             case 'added':
                 $value = is_array($elem['value']) ? 'complex value' : $elem['value'];
-                return [...$current, "Property '$prefix{$elem['key']}' was added with value: '{$value}'"];
+                return [
+                    ...$current,
+                    "Property '$prefix{$elem['key']}' was added with value: '" . formatValue($value) . "'"
+                ];
             case 'removed':
                 return [...$current, "Property '$prefix{$elem['key']}' was removed"];
             case 'changed':
+                [$old, $new] = array_map('Gendiff\Output\formatValue', [$elem['old'], $elem['value']]);
                 return [
                     ...$current,
-                    "Property '$prefix{$elem['key']}' was changed. From '{$elem['old']}' to '{$elem['value']}'"
+                    "Property '$prefix{$elem['key']}' was changed. From '$old' to '$new'"
                 ];
             default:
                 return $current;

@@ -20,3 +20,12 @@ function format(array $data, string $format): string
             throw new Exception("Unknown format '$format'");
     }
 }
+
+function formatValue($val): string
+{
+    if (is_bool($val)) {
+        return $val ? 'true' : 'false';
+    } else {
+        return $val;
+    }
+}

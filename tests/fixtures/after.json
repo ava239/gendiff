@@ -2,12 +2,15 @@
   "common": {
     "setting1": "Value 1",
     "setting3": true,
+    "settingBool": true,
     "setting4": "blah blah",
     "setting5": {
-      "key5": "value5"
+      "key5": "value5",
+      "kb": false
     },
     "setting9": {
-      "keys": 1
+      "keys": 1,
+      "test": true
     }
   },
 

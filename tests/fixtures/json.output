@@ -1,7 +1,6 @@
 [
     {
         "key": "common",
-        "value": "complex value",
         "children": [
             {
                 "key": "setting1",
@@ -19,6 +18,12 @@
                 "type": "kept"
             },
             {
+                "key": "settingBool",
+                "value": true,
+                "old": false,
+                "type": "changed"
+            },
+            {
                 "key": "setting6",
                 "value": {
                     "key": "value"
@@ -27,11 +32,15 @@
             },
             {
                 "key": "setting9",
-                "value": "complex value",
                 "children": [
                     {
                         "key": "keys",
                         "value": 1,
+                        "type": "added"
+                    },
+                    {
+                        "key": "test",
+                        "value": true,
                         "type": "added"
                     }
                 ]
@@ -44,7 +53,8 @@
             {
                 "key": "setting5",
                 "value": {
-                    "key5": "value5"
+                    "key5": "value5",
+                    "kb": false
                 },
                 "type": "added"
             }
@@ -52,7 +62,6 @@
     },
     {
         "key": "group1",
-        "value": "complex value",
         "children": [
             {
                 "key": "baz",
