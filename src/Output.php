@@ -26,6 +26,6 @@ function formatValue($val): string
     if (is_bool($val)) {
         return $val ? 'true' : 'false';
     } else {
-        return $val;
+        return (string) $val;
     }
 }
