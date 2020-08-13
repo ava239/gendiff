@@ -2,7 +2,7 @@
 
 namespace Gendiff\Formatters\Plain;
 
-use function Gendiff\Output\formatValue;
+use function Gendiff\Formatters\formatValue;
 
 function format(array $data): string
 {
@@ -24,7 +24,7 @@ function format(array $data): string
             case 'removed':
                 return [...$current, "Property '$prefix{$elem['key']}' was removed"];
             case 'changed':
-                [$old, $new] = array_map('Gendiff\Output\formatValue', [$elem['old'], $elem['value']]);
+                [$old, $new] = array_map('Gendiff\Formatters\formatValue', [$elem['old'], $elem['value']]);
                 return [
                     ...$current,
                     "Property '$prefix{$elem['key']}' was changed. From '$old' to '$new'"

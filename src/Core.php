@@ -1,10 +1,10 @@
 <?php
 
-namespace Gendiff\Gendiff;
+namespace Gendiff\Core;
 
 use Exception;
 use Gendiff\Parsers;
-use Gendiff\Output;
+use Gendiff\Formatters;
 
 function compareFiles(string $path1, string $path2, string $outputFormat = 'pretty'): string
 {
@@ -15,7 +15,7 @@ function compareFiles(string $path1, string $path2, string $outputFormat = 'pret
     $data1 = Parsers\parse($fileContents1, $format1);
     $data2 = Parsers\parse($fileContents2, $format2);
     $diff = getDiff($data1, $data2);
-    return Output\format($diff, $outputFormat);
+    return Formatters\format($diff, $outputFormat);
 }
 
 function readFile(string $file): string

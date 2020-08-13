@@ -2,7 +2,7 @@
 
 namespace Gendiff\Formatters\Pretty;
 
-use function Gendiff\Output\formatValue;
+use function Gendiff\Formatters\formatValue;
 
 const OPERATION_PREFIXES = [
     'kept' => '  ',
@@ -41,7 +41,7 @@ function format(array $data): string
         }
         switch ($elem['type']) {
             case 'changed':
-                [$old, $new] = array_map('Gendiff\Output\formatValue', [$elem['old'], $elem['value']]);
+                [$old, $new] = array_map('Gendiff\Formatters\formatValue', [$elem['old'], $elem['value']]);
                 return [
                     ...$current,
                     "$indent- {$elem['key']}: $old",

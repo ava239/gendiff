@@ -1,6 +1,6 @@
 <?php
 
-namespace Gendiff\Output;
+namespace Gendiff\Formatters;
 
 use Exception;
 use Gendiff\Formatters\Pretty;

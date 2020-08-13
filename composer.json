@@ -19,8 +19,8 @@
   },
   "autoload": {
     "files": [
-      "src/Gendiff.php",
-      "src/Output.php",
+      "src/Core.php",
+      "src/Formatters.php",
       "src/Parsers.php",
       "src/formatters/Pretty.php",
       "src/formatters/Plain.php",
