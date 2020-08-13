@@ -38,25 +38,25 @@ function detectFormat(string $file): string
 
 function getDiff(array $data1, array $data2): array
 {
-    $dataKeys = array_unique(array_merge(array_keys($data1), array_keys($data2)));
-    return array_reduce($dataKeys, function ($acc, $key) use ($data1, $data2) {
-        $elem1 = $data1[$key] ?? null;
-        $elem2 = $data2[$key] ?? null;
-        if ($elem1 === $elem2) {
-            return [...$acc, ['key' => $key, 'value' => $elem2, 'type' => 'kept']];
+    $nodeNames = array_unique(array_merge(array_keys($data1), array_keys($data2)));
+    return array_reduce($nodeNames, function ($acc, $key) use ($data1, $data2) {
+        $node1 = $data1[$key] ?? null;
+        $node2 = $data2[$key] ?? null;
+        if ($node1 === $node2) {
+            return [...$acc, ['key' => $key, 'value' => $node2, 'type' => 'kept']];
         }
-        if (is_null($elem1)) {
-            return [...$acc, ['key' => $key, 'value' => $elem2, 'type' => 'added']];
+        if (is_null($node1)) {
+            return [...$acc, ['key' => $key, 'value' => $node2, 'type' => 'added']];
         }
-        if (is_null($elem2)) {
-            return [...$acc, ['key' => $key, 'value' => $elem1, 'type' => 'removed']];
+        if (is_null($node2)) {
+            return [...$acc, ['key' => $key, 'value' => $node1, 'type' => 'removed']];
         }
-        if (is_array($elem1) && is_array($elem2)) {
+        if (is_array($node1) && is_array($node2)) {
             return [
                 ...$acc,
-                ['key' => $key, 'children' => getDiff($elem1, $elem2)]
+                ['key' => $key, 'children' => getDiff($node1, $node2)]
             ];
         }
-        return [...$acc, ['key' => $key, 'value' => $elem2, 'old' => $elem1, 'type' => 'changed']];
+        return [...$acc, ['key' => $key, 'value' => $node2, 'old' => $node1, 'type' => 'changed']];
     }, []);
 }
