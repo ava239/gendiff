@@ -21,11 +21,13 @@ function format(array $data, string $format): string
     }
 }
 
-function formatValue($val): string
+function formatValue($value): string
 {
-    if (is_bool($val)) {
-        return $val ? 'true' : 'false';
+    if (is_bool($value)) {
+        return $value ? 'true' : 'false';
+    } elseif (is_array($value)) {
+        return 'complex value';
     } else {
-        return (string) $val;
+        return (string) $value;
     }
 }

@@ -2,37 +2,53 @@
 
 namespace Gendiff\Formatters\Plain;
 
+use Exception;
+
 use function Gendiff\Formatters\formatValue;
 
 function format(array $data): string
 {
-    $iter = function ($elem, $current, $prefix = '') use (&$iter) {
-        if (isset($elem['children'])) {
-            return array_reduce(
-                $elem['children'],
-                fn($acc, $item) => [...$acc, ...$iter($item, [], "$prefix{$elem['key']}.")],
-                $current
-            );
-        }
-        switch ($elem['type']) {
+    $iter = function ($node, $current, $prefix = '') use (&$iter) {
+        $fullNodeKey = $prefix . $node['key'];
+        switch ($node['type']) {
+            case 'complex':
+                return array_reduce(
+                    $node['children'],
+                    fn($acc, $item) => [...$acc, ...$iter($item, [], "{$fullNodeKey}.")],
+                    $current
+                );
             case 'added':
-                $value = is_array($elem['value']) ? 'complex value' : $elem['value'];
                 return [
                     ...$current,
-                    "Property '$prefix{$elem['key']}' was added with value: '" . formatValue($value) . "'"
+                    sprintf(
+                        "Property '%s' was added with value: '%s'",
+                        $fullNodeKey,
+                        formatValue($node['value'])
+                    )
                 ];
             case 'removed':
-                return [...$current, "Property '$prefix{$elem['key']}' was removed"];
-            case 'changed':
-                [$old, $new] = array_map('Gendiff\Formatters\formatValue', [$elem['old'], $elem['value']]);
                 return [
                     ...$current,
-                    "Property '$prefix{$elem['key']}' was changed. From '$old' to '$new'"
+                    sprintf(
+                        "Property '%s' was removed",
+                        $fullNodeKey
+                    )];
+            case 'changed':
+                return [
+                    ...$current,
+                    sprintf(
+                        "Property '%s' was changed. From '%s' to '%s'",
+                        $fullNodeKey,
+                        formatValue($node['old']),
+                        formatValue($node['value'])
+                    )
                 ];
-            default:
+            case 'kept':
                 return $current;
+            default:
+                throw new Exception("Unknown node type: '{$node['type']}'");
         }
     };
-    $lines = array_reduce($data, fn($acc, $elem) => [...$acc, ...$iter($elem, [])], []);
+    $lines = array_reduce($data, fn($acc, $node) => [...$acc, ...$iter($node, [])], []);
     return implode("\n", $lines);
 }

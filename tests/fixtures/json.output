@@ -43,7 +43,9 @@
                         "value": true,
                         "type": "added"
                     }
-                ]
+                ],
+                "value": "complex value",
+                "type": "complex"
             },
             {
                 "key": "setting4",
@@ -58,7 +60,9 @@
                 },
                 "type": "added"
             }
-        ]
+        ],
+        "value": "complex value",
+        "type": "complex"
     },
     {
         "key": "group1",
@@ -74,7 +78,9 @@
                 "value": "bar",
                 "type": "kept"
             }
-        ]
+        ],
+        "value": "complex value",
+        "type": "complex"
     },
     {
         "key": "group2",

@@ -2,6 +2,8 @@
 
 namespace Gendiff\Formatters\Pretty;
 
+use Exception;
+
 use function Gendiff\Formatters\formatValue;
 
 const OPERATION_PREFIXES = [
@@ -9,51 +11,51 @@ const OPERATION_PREFIXES = [
     'added' => '+ ',
     'removed' => '- ',
     'changed' => '  ',
+    'complex' => '  ',
 ],
 INDENT_STEP = '    ';
 
 function format(array $data): string
 {
-    $iter = function ($elem, $current, $depth = 0) use (&$iter) {
+    $iter = function ($node, $current, $depth = 0) use (&$iter) {
         $indent = str_repeat(INDENT_STEP, $depth) . '  ';
-        if (isset($elem['children'])) {
-            return [
-                "$indent  {$elem['key']}: {",
-                ...array_reduce(
-                    $elem['children'],
-                    fn($acc, $item) => [...$acc, ...$iter($item, $current, $depth + 1)],
-                    []
-                ),
-                "$indent  }"
-            ];
-        }
-        $operation = OPERATION_PREFIXES[$elem['type']];
-        if (is_array($elem['value'])) {
-            return [
-                ...$current,
-                "$indent{$operation}{$elem['key']}: {",
-                ...array_map(
-                    fn($key) => "$indent      {$key}: " . formatValue($elem['value'][$key]),
-                    array_keys($elem['value'])
-                ),
-                "$indent  }"
-            ];
-        }
-        switch ($elem['type']) {
+        $operation = OPERATION_PREFIXES[$node['type']];
+        switch ($node['type']) {
+            case 'complex':
+                return [
+                    "{$indent}  {$node['key']}: {",
+                    ...array_reduce(
+                        $node['children'],
+                        fn($acc, $child) => [...$acc, ...$iter($child, $current, $depth + 1)],
+                        []
+                    ),
+                    "$indent  }"
+                ];
             case 'changed':
-                [$old, $new] = array_map('Gendiff\Formatters\formatValue', [$elem['old'], $elem['value']]);
                 return [
                     ...$current,
-                    "$indent- {$elem['key']}: $old",
-                    "$indent+ {$elem['key']}: $new"
+                    $indent . OPERATION_PREFIXES['removed'] . $node['key'] . ": " . formatValue($node['old']),
+                    $indent . OPERATION_PREFIXES['added'] . $node['key'] . ": " . formatValue($node['value']),
                 ];
             case 'kept':
             case 'added':
             case 'removed':
+                if (is_array($node['value'])) {
+                    return [
+                        ...$current,
+                        "{$indent}{$operation}{$node['key']}: {",
+                        ...array_map(
+                            fn($key) => $indent . "      " . $key . ": " . formatValue($node['value'][$key]),
+                            array_keys($node['value'])
+                        ),
+                        "$indent  }"
+                    ];
+                }
+                return [...$current, $indent . $operation . $node['key'] . ": " . formatValue($node['value'])];
             default:
-                return [...$current, "$indent{$operation}{$elem['key']}: " . formatValue($elem['value'])];
+                throw new Exception("Unknown node type: '{$node['type']}'");
         }
     };
-    $lines = ["{", ...array_reduce($data, fn($acc, $item) => [...$acc, ...$iter($item, [])], []), "}"];
+    $lines = ["{", ...array_reduce($data, fn($acc, $node) => [...$acc, ...$iter($node, [])], []), "}"];
     return implode("\n", $lines);
 }

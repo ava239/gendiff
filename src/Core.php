@@ -54,7 +54,7 @@ function getDiff(array $data1, array $data2): array
         if (is_array($node1) && is_array($node2)) {
             return [
                 ...$acc,
-                ['key' => $key, 'children' => getDiff($node1, $node2)]
+                ['key' => $key, 'children' => getDiff($node1, $node2), 'value' => 'complex value', 'type' => 'complex']
             ];
         }
         return [...$acc, ['key' => $key, 'value' => $node2, 'old' => $node1, 'type' => 'changed']];
