@@ -3,20 +3,21 @@
 namespace Gendiff\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Gendiff\Gendiff;
+use Gendiff\Core;
 
 class DiffTest extends TestCase
 {
-    protected $fixturePath = 'tests/fixtures/';
+    private const FIXTURES_PATH = __DIR__ . '/fixtures/';
+
     /**
      * @dataProvider formatsProvider
      */
     public function testDiff($outputFormat, $inputFormat)
     {
-        $file1 = "{$this->fixturePath}before.$inputFormat";
-        $file2 = "{$this->fixturePath}after.$inputFormat";
-        $expectedOutput = file_get_contents("{$this->fixturePath}{$outputFormat}.output");
-        $this->assertEquals($expectedOutput, Gendiff\compareFiles($file1, $file2, $outputFormat));
+        $file1 = self::FIXTURES_PATH . "before." . $inputFormat;
+        $file2 = self::FIXTURES_PATH . "after." . $inputFormat;
+        $expectedOutput = file_get_contents(self::FIXTURES_PATH . $outputFormat . ".output");
+        $this->assertEquals($expectedOutput, Core\compareFiles($file1, $file2, $outputFormat));
     }
 
     public function formatsProvider()
