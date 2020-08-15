@@ -72,32 +72,43 @@ function getIndent(int $depth): string
     return str_repeat(INDENT_STEP, $depth);
 }
 
-function isAssocArray(array $arr): bool
-{
-    return array_values($arr) !== $arr;
-}
-
 function formatValue($value, int $depth): string
 {
     if (is_bool($value)) {
         return formatBooleanValue($value);
-    } elseif (is_array($value)) {
-        $isAssoc = isAssocArray($value);
+    } elseif (is_object($value)) {
         return implode(
             END_OF_LINE,
             [
-                ($isAssoc ? '{' : '['),
+                '{',
                 ...array_map(
                     fn($key) => sprintf(
                         '  %s%s  %s%s',
                         getIndent($depth),
                         INDENT_STEP,
-                        ($isAssoc ? "{$key}: " : ""),
+                        "{$key}: ",
+                        formatValue($value->$key, $depth + 1)
+                    ),
+                    array_keys((array)$value)
+                ),
+                getIndent($depth + 1) . '}'
+            ]
+        );
+    } elseif (is_array($value)) {
+        return implode(
+            END_OF_LINE,
+            [
+                '[',
+                ...array_map(
+                    fn($key) => sprintf(
+                        '  %s%s  %s',
+                        getIndent($depth),
+                        INDENT_STEP,
                         formatValue($value[$key], $depth + 1)
                     ),
                     array_keys($value)
                 ),
-                getIndent($depth + 1) . ($isAssoc ? '}' : ']')
+                getIndent($depth + 1) . ']'
             ]
         );
     } else {

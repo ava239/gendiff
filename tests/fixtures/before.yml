@@ -5,7 +5,7 @@ common:
   settingBool: false
   setting6:
     key: value
-  setting9: []
+  setting9: {}
   new:
     hosts:
      - hexlet.io

@@ -58,7 +58,7 @@ function formatValue($value): string
 {
     if (is_bool($value)) {
         return formatBooleanValue($value);
-    } elseif (is_array($value)) {
+    } elseif (is_object($value)) {
         return 'complex value';
     } else {
         return (string)$value;

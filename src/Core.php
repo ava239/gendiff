@@ -36,12 +36,12 @@ function detectFormat(string $file): string
     return strtolower($info['extension']);
 }
 
-function getDiff(array $data1, array $data2): array
+function getDiff(object $data1, object $data2): array
 {
-    $nodeNames = array_unique(array_merge(array_keys($data1), array_keys($data2)));
+    $nodeNames = array_unique(array_keys(array_merge((array)($data1), (array)($data2))));
     return array_reduce($nodeNames, function ($acc, $key) use ($data1, $data2) {
-        $node1 = $data1[$key] ?? null;
-        $node2 = $data2[$key] ?? null;
+        $node1 = $data1->{$key} ?? null;
+        $node2 = $data2->{$key} ?? null;
         if ($node1 === $node2) {
             return [...$acc, ['key' => $key, 'value' => $node2, 'type' => 'kept']];
         }
@@ -51,7 +51,7 @@ function getDiff(array $data1, array $data2): array
         if (is_null($node2)) {
             return [...$acc, ['key' => $key, 'value' => $node1, 'type' => 'removed']];
         }
-        if (is_array($node1) && is_array($node2)) {
+        if (is_object($node1) && is_object($node2)) {
             return [
                 ...$acc,
                 ['key' => $key, 'children' => getDiff($node1, $node2), 'value' => 'complex value', 'type' => 'complex']
