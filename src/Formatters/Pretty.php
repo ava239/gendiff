@@ -83,11 +83,11 @@ function formatValue($value, int $depth): string
                 '{',
                 ...array_map(
                     fn($key) => sprintf(
-                        '  %s%s  %s%s',
+                        '  %s%s  %s: %s',
                         getIndent($depth),
                         INDENT_STEP,
-                        "{$key}: ",
-                        formatValue($value->$key, $depth + 1)
+                        $key,
+                        formatValue($value->{$key}, $depth + 1)
                     ),
                     array_keys((array)$value)
                 ),
