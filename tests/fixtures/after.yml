@@ -1,16 +1,22 @@
 common:
-  setting1: "Value 1"
+  setting1: Value 1
   setting3: true
   settingBool: true
-  setting4: "blah blah"
+  setting4: blah blah
   setting5:
-    key5: "value5"
+    key5: value5
     kb: false
   setting9:
     keys: 1
     test: true
+  nested:
+    authors:
+      - name: Dima Oliferchuk
+        email: ava239@yandex.ru
+      - name: Nikolay Gagarinov
+        email: feycot@gmail.com
 group1:
-  foo: "bar"
-  baz: "bars"
+  foo: bar
+  baz: bars
 group3:
   fee: 100500

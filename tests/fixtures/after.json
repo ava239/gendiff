@@ -11,9 +11,20 @@
     "setting9": {
       "keys": 1,
       "test": true
+    },
+    "nested": {
+      "authors": [
+        {
+          "name": "Dima Oliferchuk",
+          "email": "ava239@yandex.ru"
+        },
+        {
+          "name": "Nikolay Gagarinov",
+          "email": "feycot@gmail.com"
+        }
+      ]
     }
   },
-
   "group1": {
     "foo": "bar",
     "baz": "bars"

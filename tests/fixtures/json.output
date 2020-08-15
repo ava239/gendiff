@@ -48,6 +48,18 @@
                 "type": "complex"
             },
             {
+                "key": "new",
+                "value": {
+                    "hosts": [
+                        "hexlet.io",
+                        "example.com",
+                        "google.ru",
+                        "differ.test"
+                    ]
+                },
+                "type": "removed"
+            },
+            {
                 "key": "setting4",
                 "value": "blah blah",
                 "type": "added"
@@ -57,6 +69,22 @@
                 "value": {
                     "key5": "value5",
                     "kb": false
+                },
+                "type": "added"
+            },
+            {
+                "key": "nested",
+                "value": {
+                    "authors": [
+                        {
+                            "name": "Dima Oliferchuk",
+                            "email": "ava239@yandex.ru"
+                        },
+                        {
+                            "name": "Nikolay Gagarinov",
+                            "email": "feycot@gmail.com"
+                        }
+                    ]
                 },
                 "type": "added"
             }

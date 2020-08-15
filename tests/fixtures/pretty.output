@@ -12,10 +12,30 @@
           + keys: 1
           + test: true
         }
+      - new: {
+            hosts: [
+                hexlet.io
+                example.com
+                google.ru
+                differ.test
+            ]
+        }
       + setting4: blah blah
       + setting5: {
             key5: value5
             kb: false
+        }
+      + nested: {
+            authors: [
+                {
+                    name: Dima Oliferchuk
+                    email: ava239@yandex.ru
+                }
+                {
+                    name: Nikolay Gagarinov
+                    email: feycot@gmail.com
+                }
+            ]
         }
     }
     group1: {

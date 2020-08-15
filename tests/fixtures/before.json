@@ -8,6 +8,14 @@
       "key": "value"
     },
     "setting9": {
+    },
+    "new": {
+      "hosts": [
+        "hexlet.io",
+        "example.com",
+        "google.ru",
+        "differ.test"
+      ]
     }
   },
   "group1": {
