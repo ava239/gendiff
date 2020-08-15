@@ -18,21 +18,20 @@ INDENT_STEP = '    ';
 
 function format(array $data): string
 {
-    $iter = function ($node, $linesAcc, $depth = 0) use (&$iter) {
+    $iter = function ($node, $depth = 0) use (&$iter) {
         switch ($node['type']) {
             case 'complex':
                 return [
                     getIndent($depth + 1) . "{$node['key']}: {",
                     ...array_reduce(
                         $node['children'],
-                        fn($acc, $child) => [...$acc, ...$iter($child, $linesAcc, $depth + 1)],
+                        fn($acc, $child) => [...$acc, ...$iter($child, $depth + 1)],
                         []
                     ),
                     getIndent($depth + 1) . "}"
                 ];
             case 'changed':
                 return [
-                    ...$linesAcc,
                     sprintf(
                         '  %s%s%s: %s',
                         getIndent($depth),
@@ -52,7 +51,6 @@ function format(array $data): string
             case 'added':
             case 'removed':
                 return [
-                    ...$linesAcc,
                     sprintf(
                         '  %s%s%s: %s',
                         getIndent($depth),
@@ -65,7 +63,7 @@ function format(array $data): string
                 throw new Exception("Unknown node type: '{$node['type']}'");
         }
     };
-    $lines = Collection\flatten(["{", ...(array_map(fn($node) => $iter($node, []), $data)), "}"]);
+    $lines = Collection\flatten(["{", ...(array_map(fn($node) => $iter($node), $data)), "}"]);
     return implode(END_OF_LINE, $lines);
 }
 

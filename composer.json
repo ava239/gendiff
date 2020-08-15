@@ -23,9 +23,9 @@
       "src/Core.php",
       "src/Formatters.php",
       "src/Parsers.php",
-      "src/formatters/Pretty.php",
-      "src/formatters/Plain.php",
-      "src/formatters/Json.php"
+      "src/Formatters/Pretty.php",
+      "src/Formatters/Plain.php",
+      "src/Formatters/Json.php"
     ],
     "psr-4": {
       "Gendiff\\Tests\\": "tests"
