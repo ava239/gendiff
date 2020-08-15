@@ -5,6 +5,7 @@ namespace Gendiff\Formatters\Pretty;
 use Exception;
 
 use function Gendiff\Formatters\formatValue;
+use const Gendiff\Formatters\END_OF_LINE;
 
 const OPERATION_PREFIXES = [
     'kept' => '  ',
@@ -84,5 +85,5 @@ function format(array $data): string
         }
     };
     $lines = ["{", ...array_reduce($data, fn($acc, $node) => [...$acc, ...$iter($node, [])], []), "}"];
-    return implode(PHP_EOL, $lines);
+    return implode(END_OF_LINE, $lines);
 }

@@ -5,6 +5,7 @@ namespace Gendiff\Formatters\Plain;
 use Exception;
 
 use function Gendiff\Formatters\formatValue;
+use const Gendiff\Formatters\END_OF_LINE;
 
 function format(array $data): string
 {
@@ -50,5 +51,5 @@ function format(array $data): string
         }
     };
     $lines = array_reduce($data, fn($acc, $node) => [...$acc, ...$iter($node, [])], []);
-    return implode(PHP_EOL, $lines);
+    return implode(END_OF_LINE, $lines);
 }

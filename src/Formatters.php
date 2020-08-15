@@ -7,6 +7,8 @@ use Gendiff\Formatters\Pretty;
 use Gendiff\Formatters\Plain;
 use Gendiff\Formatters\Json;
 
+const END_OF_LINE = "\n";
+
 function format(array $data, string $format): string
 {
     switch ($format) {
