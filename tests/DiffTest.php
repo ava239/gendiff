@@ -23,12 +23,12 @@ class DiffTest extends TestCase
     public function formatsProvider()
     {
         return [
-            ['pretty', 'json'],
-            ['pretty', 'yml'],
             ['json', 'json'],
             ['json', 'yml'],
             ['plain', 'json'],
             ['plain', 'yml'],
+            ['pretty', 'json'],
+            ['pretty', 'yml'],
         ];
     }
 }

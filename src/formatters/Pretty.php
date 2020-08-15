@@ -3,87 +3,106 @@
 namespace Gendiff\Formatters\Pretty;
 
 use Exception;
+use Funct\Collection;
 
-use function Gendiff\Formatters\formatValue;
+use function Gendiff\Formatters\formatBooleanValue;
+
 use const Gendiff\Formatters\END_OF_LINE;
 
 const OPERATION_PREFIXES = [
     'kept' => '  ',
     'added' => '+ ',
     'removed' => '- ',
-    'changed' => '  ',
-    'complex' => '  ',
 ],
 INDENT_STEP = '    ';
 
 function format(array $data): string
 {
     $iter = function ($node, $linesAcc, $depth = 0) use (&$iter) {
-        $indent = str_repeat(INDENT_STEP, $depth) . '  ';
-        $operation = OPERATION_PREFIXES[$node['type']];
         switch ($node['type']) {
             case 'complex':
                 return [
-                    "{$indent}  {$node['key']}: {",
+                    getIndent($depth + 1) . "{$node['key']}: {",
                     ...array_reduce(
                         $node['children'],
                         fn($acc, $child) => [...$acc, ...$iter($child, $linesAcc, $depth + 1)],
                         []
                     ),
-                    "$indent  }"
+                    getIndent($depth + 1) . "}"
                 ];
             case 'changed':
                 return [
                     ...$linesAcc,
                     sprintf(
-                        '%s%s%s: %s',
-                        $indent,
+                        '  %s%s%s: %s',
+                        getIndent($depth),
                         OPERATION_PREFIXES['removed'],
                         $node['key'],
-                        formatValue($node['old'])
+                        formatValue($node['old'], $depth)
                     ),
                     sprintf(
-                        '%s%s%s: %s',
-                        $indent,
+                        '  %s%s%s: %s',
+                        getIndent($depth),
                         OPERATION_PREFIXES['added'],
                         $node['key'],
-                        formatValue($node['value'])
+                        formatValue($node['value'], $depth)
                     ),
                 ];
             case 'kept':
             case 'added':
             case 'removed':
-                if (is_array($node['value'])) {
-                    return [
-                        ...$linesAcc,
-                        "{$indent}{$operation}{$node['key']}: {",
-                        ...array_map(
-                            fn($key) => sprintf(
-                                '%s%s  %s: %s',
-                                $indent,
-                                INDENT_STEP,
-                                $key,
-                                formatValue($node['value'][$key])
-                            ),
-                            array_keys($node['value'])
-                        ),
-                        "$indent  }"
-                    ];
-                }
                 return [
                     ...$linesAcc,
                     sprintf(
-                        '%s%s%s: %s',
-                        $indent,
-                        $operation,
+                        '  %s%s%s: %s',
+                        getIndent($depth),
+                        OPERATION_PREFIXES[$node['type']],
                         $node['key'],
-                        formatValue($node['value'])
-                    )
+                        formatValue($node['value'], $depth)
+                    ),
                 ];
             default:
                 throw new Exception("Unknown node type: '{$node['type']}'");
         }
     };
-    $lines = ["{", ...array_reduce($data, fn($acc, $node) => [...$acc, ...$iter($node, [])], []), "}"];
+    $lines = Collection\flatten(["{", ...(array_map(fn($node) => $iter($node, []), $data)), "}"]);
     return implode(END_OF_LINE, $lines);
+}
+
+function getIndent(int $depth): string
+{
+    return str_repeat(INDENT_STEP, $depth);
+}
+
+function isAssocArray(array $arr): bool
+{
+    return array_values($arr) !== $arr;
+}
+
+function formatValue($value, int $depth): string
+{
+    if (is_bool($value)) {
+        return formatBooleanValue($value);
+    } elseif (is_array($value)) {
+        $isAssoc = isAssocArray($value);
+        return implode(
+            END_OF_LINE,
+            [
+                ($isAssoc ? '{' : '['),
+                ...array_map(
+                    fn($key) => sprintf(
+                        '  %s%s  %s%s',
+                        getIndent($depth),
+                        INDENT_STEP,
+                        ($isAssoc ? "{$key}: " : ""),
+                        formatValue($value[$key], $depth + 1)
+                    ),
+                    array_keys($value)
+                ),
+                getIndent($depth + 1) . ($isAssoc ? '}' : ']')
+            ]
+        );
+    } else {
+        return (string)$value;
+    }
 }

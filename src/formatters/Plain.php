@@ -3,8 +3,10 @@
 namespace Gendiff\Formatters\Plain;
 
 use Exception;
+use Funct\Collection;
 
-use function Gendiff\Formatters\formatValue;
+use function Gendiff\Formatters\formatBooleanValue;
+
 use const Gendiff\Formatters\END_OF_LINE;
 
 function format(array $data): string
@@ -50,6 +52,17 @@ function format(array $data): string
                 throw new Exception("Unknown node type: '{$node['type']}'");
         }
     };
-    $lines = array_reduce($data, fn($acc, $node) => [...$acc, ...$iter($node, [])], []);
+    $lines = Collection\flatten(array_map(fn($node) => $iter($node, []), $data));
     return implode(END_OF_LINE, $lines);
+}
+
+function formatValue($value): string
+{
+    if (is_bool($value)) {
+        return formatBooleanValue($value);
+    } elseif (is_array($value)) {
+        return 'complex value';
+    } else {
+        return (string) $value;
+    }
 }

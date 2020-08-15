@@ -23,13 +23,7 @@ function format(array $data, string $format): string
     }
 }
 
-function formatValue($value): string
+function formatBooleanValue(bool $value): string
 {
-    if (is_bool($value)) {
-        return $value ? 'true' : 'false';
-    } elseif (is_array($value)) {
-        return 'complex value';
-    } else {
-        return (string) $value;
-    }
+    return $value ? 'true' : 'false';
 }

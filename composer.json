@@ -15,7 +15,8 @@
   "require": {
     "docopt/docopt": "^1.0",
     "ext-json": "*",
-    "symfony/yaml": "^5.1"
+    "symfony/yaml": "^5.1",
+    "funct/funct": "^1.5"
   },
   "autoload": {
     "files": [
