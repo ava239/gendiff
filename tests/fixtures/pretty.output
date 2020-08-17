@@ -42,6 +42,7 @@
       - baz: bas
       + baz: bars
         foo: bar
+      + empty: null
     }
   - group2: {
         abc: 12345

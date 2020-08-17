@@ -1,53 +1,54 @@
 [
     {
+        "type": "complex",
         "key": "common",
         "children": [
             {
+                "type": "kept",
                 "key": "setting1",
-                "value": "Value 1",
-                "type": "kept"
+                "value": "Value 1"
             },
             {
+                "type": "removed",
                 "key": "setting2",
-                "value": "200",
-                "type": "removed"
+                "value": "200"
             },
             {
+                "type": "kept",
                 "key": "setting3",
-                "value": true,
-                "type": "kept"
+                "value": true
             },
             {
+                "type": "changed",
                 "key": "settingBool",
                 "value": true,
-                "old": false,
-                "type": "changed"
+                "old": false
             },
             {
+                "type": "removed",
                 "key": "setting6",
                 "value": {
                     "key": "value"
-                },
-                "type": "removed"
+                }
             },
             {
+                "type": "complex",
                 "key": "setting9",
                 "children": [
                     {
+                        "type": "added",
                         "key": "keys",
-                        "value": 1,
-                        "type": "added"
+                        "value": 1
                     },
                     {
+                        "type": "added",
                         "key": "test",
-                        "value": true,
-                        "type": "added"
+                        "value": true
                     }
-                ],
-                "value": "complex value",
-                "type": "complex"
+                ]
             },
             {
+                "type": "removed",
                 "key": "new",
                 "value": {
                     "hosts": [
@@ -56,23 +57,23 @@
                         "google.ru",
                         "differ.test"
                     ]
-                },
-                "type": "removed"
+                }
             },
             {
+                "type": "added",
                 "key": "setting4",
-                "value": "blah blah",
-                "type": "added"
+                "value": "blah blah"
             },
             {
+                "type": "added",
                 "key": "setting5",
                 "value": {
                     "key5": "value5",
                     "kb": false
-                },
-                "type": "added"
+                }
             },
             {
+                "type": "added",
                 "key": "nested",
                 "value": {
                     "authors": [
@@ -85,43 +86,44 @@
                             "email": "feycot@gmail.com"
                         }
                     ]
-                },
-                "type": "added"
+                }
             }
-        ],
-        "value": "complex value",
-        "type": "complex"
+        ]
     },
     {
+        "type": "complex",
         "key": "group1",
         "children": [
             {
+                "type": "changed",
                 "key": "baz",
                 "value": "bars",
-                "old": "bas",
-                "type": "changed"
+                "old": "bas"
             },
             {
+                "type": "kept",
                 "key": "foo",
-                "value": "bar",
-                "type": "kept"
+                "value": "bar"
+            },
+            {
+                "type": "added",
+                "key": "empty",
+                "value": null
             }
-        ],
-        "value": "complex value",
-        "type": "complex"
+        ]
     },
     {
+        "type": "removed",
         "key": "group2",
         "value": {
             "abc": 12345
-        },
-        "type": "removed"
+        }
     },
     {
+        "type": "added",
         "key": "group3",
         "value": {
             "fee": 100500
-        },
-        "type": "added"
+        }
     }
 ]

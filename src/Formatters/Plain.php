@@ -24,7 +24,7 @@ function format(array $data): string
             case 'added':
                 return [
                     sprintf(
-                        "Property '%s' was added with value: '%s'",
+                        "Property '%s' was added with value: %s",
                         $fullNodeKey,
                         formatValue($node['value'])
                     )
@@ -38,7 +38,7 @@ function format(array $data): string
             case 'changed':
                 return [
                     sprintf(
-                        "Property '%s' was changed. From '%s' to '%s'",
+                        "Property '%s' was changed. From %s to %s",
                         $fullNodeKey,
                         formatValue($node['old']),
                         formatValue($node['value'])
@@ -56,11 +56,21 @@ function format(array $data): string
 
 function formatValue($value): string
 {
-    if (is_bool($value)) {
-        return formatBooleanValue($value);
-    } elseif (is_object($value)) {
-        return 'complex value';
-    } else {
-        return (string)$value;
+    $valueType = gettype($value);
+    $addQuotes = fn($value) => sprintf("'%s'", $value);
+    switch ($valueType) {
+        case 'boolean':
+            return $addQuotes(formatBooleanValue($value));
+        case 'object':
+        case 'array':
+            return $addQuotes('complex value');
+        case 'NULL':
+            return 'null';
+        case 'integer':
+        case 'double':
+        case 'string':
+            return $addQuotes((string)$value);
+        default:
+            throw new Exception("Unsupported value type {$valueType}");
     }
 }

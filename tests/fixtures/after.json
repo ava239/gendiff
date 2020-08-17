@@ -27,7 +27,8 @@
   },
   "group1": {
     "foo": "bar",
-    "baz": "bars"
+    "baz": "bars",
+    "empty": null
   },
 
   "group3": {

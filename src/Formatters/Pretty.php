@@ -74,44 +74,52 @@ function getIndent(int $depth): string
 
 function formatValue($value, int $depth): string
 {
-    if (is_bool($value)) {
-        return formatBooleanValue($value);
-    } elseif (is_object($value)) {
-        return implode(
-            END_OF_LINE,
-            [
-                '{',
-                ...array_map(
-                    fn($key) => sprintf(
-                        '  %s%s  %s: %s',
-                        getIndent($depth),
-                        INDENT_STEP,
-                        $key,
-                        formatValue($value->{$key}, $depth + 1)
+    $valueType = gettype($value);
+    switch ($valueType) {
+        case 'boolean':
+            return formatBooleanValue($value);
+        case 'object':
+            return implode(
+                END_OF_LINE,
+                [
+                    '{',
+                    ...array_map(
+                        fn($key) => sprintf(
+                            '  %s%s  %s: %s',
+                            getIndent($depth),
+                            INDENT_STEP,
+                            $key,
+                            formatValue($value->{$key}, $depth + 1)
+                        ),
+                        array_keys((array)$value)
                     ),
-                    array_keys((array)$value)
-                ),
-                getIndent($depth + 1) . '}'
-            ]
-        );
-    } elseif (is_array($value)) {
-        return implode(
-            END_OF_LINE,
-            [
-                '[',
-                ...array_map(
-                    fn($key) => sprintf(
-                        '  %s%s  %s',
-                        getIndent($depth),
-                        INDENT_STEP,
-                        formatValue($value[$key], $depth + 1)
+                    getIndent($depth + 1) . '}'
+                ]
+            );
+        case 'array':
+            return implode(
+                END_OF_LINE,
+                [
+                    '[',
+                    ...array_map(
+                        fn($key) => sprintf(
+                            '  %s%s  %s',
+                            getIndent($depth),
+                            INDENT_STEP,
+                            formatValue($value[$key], $depth + 1)
+                        ),
+                        array_keys($value)
                     ),
-                    array_keys($value)
-                ),
-                getIndent($depth + 1) . ']'
-            ]
-        );
-    } else {
-        return (string)$value;
+                    getIndent($depth + 1) . ']'
+                ]
+            );
+        case 'NULL':
+            return 'null';
+        case 'integer':
+        case 'double':
+        case 'string':
+            return (string)$value;
+        default:
+            throw new Exception("Unsupported value type {$valueType}");
     }
 }

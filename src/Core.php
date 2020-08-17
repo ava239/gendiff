@@ -38,25 +38,41 @@ function detectFormat(string $file): string
 
 function getDiff(object $data1, object $data2): array
 {
-    $nodeNames = array_unique(array_keys(array_merge((array)($data1), (array)($data2))));
-    return array_reduce($nodeNames, function ($acc, $key) use ($data1, $data2) {
-        $node1 = $data1->{$key} ?? null;
-        $node2 = $data2->{$key} ?? null;
-        if ($node1 === $node2) {
-            return [...$acc, ['key' => $key, 'value' => $node2, 'type' => 'kept']];
+    $nodeNames = array_keys(array_merge((array)($data1), (array)($data2)));
+    return array_map(function ($key) use ($data1, $data2) {
+        if (!property_exists($data1, $key)) {
+            return getNode('added', $key, $data2->{$key});
         }
-        if (is_null($node1)) {
-            return [...$acc, ['key' => $key, 'value' => $node2, 'type' => 'added']];
+        if (!property_exists($data2, $key)) {
+            return getNode('removed', $key, $data1->{$key});
         }
-        if (is_null($node2)) {
-            return [...$acc, ['key' => $key, 'value' => $node1, 'type' => 'removed']];
+        if ($data1->{$key} === $data2->{$key}) {
+            return getNode('kept', $key, $data1->{$key});
         }
-        if (is_object($node1) && is_object($node2)) {
-            return [
-                ...$acc,
-                ['key' => $key, 'children' => getDiff($node1, $node2), 'value' => 'complex value', 'type' => 'complex']
-            ];
+        if (is_object($data1->{$key}) && is_object($data2->{$key})) {
+            return getNode('complex', $key, getDiff($data1->{$key}, $data2->{$key}));
         }
-        return [...$acc, ['key' => $key, 'value' => $node2, 'old' => $node1, 'type' => 'changed']];
-    }, []);
+        return getNode('changed', $key, $data2->{$key}, $data1->{$key});
+    }, $nodeNames);
+}
+
+function getNode(string $type, $key, ...$data): array
+{
+    $node = ['type' => $type, 'key' => $key];
+    switch ($type) {
+        case 'added':
+        case 'removed':
+        case 'kept':
+            [$node['value']] = $data;
+            break;
+        case 'changed':
+            [$node['value'], $node['old']] = $data;
+            break;
+        case 'complex':
+            [$node['children']] = $data;
+            break;
+        default:
+            throw new Exception("Unknown node type: {$type}");
+    }
+    return $node;
 }
