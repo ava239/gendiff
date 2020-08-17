@@ -56,20 +56,20 @@ function getDiff(object $data1, object $data2): array
     }, $nodeNames);
 }
 
-function getNode(string $type, $key, ...$data): array
+function getNode(string $type, $key, ...$nodeData): array
 {
     $node = ['type' => $type, 'key' => $key];
     switch ($type) {
         case 'added':
         case 'removed':
         case 'kept':
-            [$node['value']] = $data;
+            [$node['value']] = $nodeData;
             break;
         case 'changed':
-            [$node['value'], $node['old']] = $data;
+            [$node['value'], $node['old']] = $nodeData;
             break;
         case 'complex':
-            [$node['children']] = $data;
+            [$node['children']] = $nodeData;
             break;
         default:
             throw new Exception("Unknown node type: {$type}");

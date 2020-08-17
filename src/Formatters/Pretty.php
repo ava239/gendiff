@@ -23,11 +23,7 @@ function format(array $data): string
             case 'complex':
                 return [
                     getIndent($depth + 1) . "{$node['key']}: {",
-                    ...array_reduce(
-                        $node['children'],
-                        fn($acc, $child) => [...$acc, ...$iter($child, $depth + 1)],
-                        []
-                    ),
+                    array_map(fn($child) => $iter($child, $depth + 1), $node['children']),
                     getIndent($depth + 1) . "}"
                 ];
             case 'changed':
@@ -50,20 +46,18 @@ function format(array $data): string
             case 'kept':
             case 'added':
             case 'removed':
-                return [
-                    sprintf(
-                        '  %s%s%s: %s',
-                        getIndent($depth),
-                        OPERATION_PREFIXES[$node['type']],
-                        $node['key'],
-                        formatValue($node['value'], $depth)
-                    ),
-                ];
+                return sprintf(
+                    '  %s%s%s: %s',
+                    getIndent($depth),
+                    OPERATION_PREFIXES[$node['type']],
+                    $node['key'],
+                    formatValue($node['value'], $depth)
+                );
             default:
                 throw new Exception("Unknown node type: '{$node['type']}'");
         }
     };
-    $lines = Collection\flatten(["{", ...(array_map(fn($node) => $iter($node), $data)), "}"]);
+    $lines = Collection\flattenAll(["{", array_map(fn($node) => $iter($node), $data), "}"]);
     return implode(END_OF_LINE, $lines);
 }
 
@@ -120,6 +114,6 @@ function formatValue($value, int $depth): string
         case 'string':
             return (string)$value;
         default:
-            throw new Exception("Unsupported value type {$valueType}");
+            throw new Exception("Unsupported value type '{$valueType}'");
     }
 }

@@ -15,42 +15,32 @@ function format(array $data): string
         $fullNodeKey = $prefix . $node['key'];
         switch ($node['type']) {
             case 'complex':
-                return Collection\flatten(
-                    array_map(
-                        fn($item) => $iter($item, "{$fullNodeKey}."),
-                        $node['children']
-                    )
-                );
+                return array_map(fn($item) => $iter($item, "{$fullNodeKey}."), $node['children']);
             case 'added':
-                return [
-                    sprintf(
-                        "Property '%s' was added with value: %s",
-                        $fullNodeKey,
-                        formatValue($node['value'])
-                    )
-                ];
+                return sprintf(
+                    "Property '%s' was added with value: %s",
+                    $fullNodeKey,
+                    formatValue($node['value'])
+                );
             case 'removed':
-                return [
-                    sprintf(
-                        "Property '%s' was removed",
-                        $fullNodeKey
-                    )];
+                return sprintf(
+                    "Property '%s' was removed",
+                    $fullNodeKey
+                );
             case 'changed':
-                return [
-                    sprintf(
-                        "Property '%s' was changed. From %s to %s",
-                        $fullNodeKey,
-                        formatValue($node['old']),
-                        formatValue($node['value'])
-                    )
-                ];
+                return sprintf(
+                    "Property '%s' was changed. From %s to %s",
+                    $fullNodeKey,
+                    formatValue($node['old']),
+                    formatValue($node['value'])
+                );
             case 'kept':
                 return [];
             default:
                 throw new Exception("Unknown node type: '{$node['type']}'");
         }
     };
-    $lines = Collection\flatten(array_map(fn($node) => $iter($node), $data));
+    $lines = Collection\flattenAll(array_map(fn($node) => $iter($node), $data));
     return implode(END_OF_LINE, $lines);
 }
 
@@ -71,6 +61,6 @@ function formatValue($value): string
         case 'string':
             return $addQuotes((string)$value);
         default:
-            throw new Exception("Unsupported value type {$valueType}");
+            throw new Exception("Unsupported value type '{$valueType}'");
     }
 }
