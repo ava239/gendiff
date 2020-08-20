@@ -14,21 +14,21 @@ class DiffTest extends TestCase
      */
     public function testDiff($outputFormat, $inputFormat)
     {
-        $file1 = self::FIXTURES_PATH . "before." . $inputFormat;
-        $file2 = self::FIXTURES_PATH . "after." . $inputFormat;
+        $filePath1 = self::FIXTURES_PATH . "before." . $inputFormat;
+        $filePath2 = self::FIXTURES_PATH . "after." . $inputFormat;
         $expectedOutput = file_get_contents(self::FIXTURES_PATH . $outputFormat . ".output");
-        $this->assertEquals($expectedOutput, Core\compareFiles($file1, $file2, $outputFormat));
+        $this->assertEquals($expectedOutput, Core\compareFiles($filePath1, $filePath2, $outputFormat));
     }
 
     public function formatsProvider()
     {
         return [
-            ['json', 'json'],
-            ['json', 'yml'],
             ['plain', 'json'],
             ['plain', 'yml'],
             ['pretty', 'json'],
             ['pretty', 'yml'],
+            ['json', 'json'],
+            ['json', 'yml'],
         ];
     }
 }

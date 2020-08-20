@@ -7,8 +7,6 @@ use Gendiff\Formatters\Pretty;
 use Gendiff\Formatters\Plain;
 use Gendiff\Formatters\Json;
 
-const END_OF_LINE = "\n";
-
 function format(array $data, string $format): string
 {
     switch ($format) {
@@ -21,9 +19,4 @@ function format(array $data, string $format): string
         default:
             throw new Exception("Unknown format '$format'");
     }
-}
-
-function formatBooleanValue(bool $value): string
-{
-    return $value ? 'true' : 'false';
 }

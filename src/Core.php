@@ -5,74 +5,88 @@ namespace Gendiff\Core;
 use Exception;
 use Gendiff\Parsers;
 use Gendiff\Formatters;
+use Funct\Collection;
 
-function compareFiles(string $path1, string $path2, string $outputFormat = 'pretty'): string
+function compareFiles(string $filepath1, string $filepath2, string $outputFormat = 'pretty'): string
 {
-    $fileContents1 = readFile($path1);
-    $fileContents2 = readFile($path2);
-    $format1 = detectFormat($path1);
-    $format2 = detectFormat($path2);
-    $data1 = Parsers\parse($fileContents1, $format1);
-    $data2 = Parsers\parse($fileContents2, $format2);
-    $diff = getDiff($data1, $data2);
+    $fileContents1 = readFile($filepath1);
+    $fileContents2 = readFile($filepath2);
+    $format1 = detectFormat($filepath1);
+    $format2 = detectFormat($filepath2);
+    $object1 = Parsers\parse($fileContents1, $format1);
+    $object2 = Parsers\parse($fileContents2, $format2);
+    $diff = getDiff($object1, $object2);
     return Formatters\format($diff, $outputFormat);
 }
 
-function readFile(string $file): string
+function readFile(string $filePath): string
 {
-    $path = realpath($file);
-    if (!is_file($path)) {
-        throw new Exception("'$file' is not a file");
+    $realFilepath = realpath($filePath);
+    if (!is_file($realFilepath)) {
+        throw new Exception("'$filePath' is not a file");
     }
-    if (!is_readable($path)) {
-        throw new Exception("Can`t read '$file'");
+    if (!is_readable($realFilepath)) {
+        throw new Exception("Can`t read '$filePath'");
     }
-    return file_get_contents($path);
+    return file_get_contents($realFilepath);
 }
 
-function detectFormat(string $file): string
+function detectFormat(string $filePath): string
 {
-    $info = pathinfo($file);
-    return strtolower($info['extension']);
+    $pathInfo = pathinfo($filePath);
+    return strtolower($pathInfo['extension']);
 }
 
-function getDiff(object $data1, object $data2): array
+function getDiff(object $object1, object $object2): array
 {
-    $nodeNames = array_keys(array_merge((array)($data1), (array)($data2)));
-    return array_map(function ($key) use ($data1, $data2) {
-        if (!property_exists($data1, $key)) {
-            return getNode('added', $key, $data2->{$key});
+    $keys1 = array_keys(get_object_vars($object1));
+    $keys2 = array_keys(get_object_vars($object2));
+    $nodeKeys = Collection\union($keys1, $keys2);
+    $diff = array_map(function ($key) use ($object1, $object2) {
+        if (!property_exists($object1, $key)) {
+            return getNode(
+                'added',
+                $key,
+                ['new' => $object2->{$key}]
+            );
         }
-        if (!property_exists($data2, $key)) {
-            return getNode('removed', $key, $data1->{$key});
+        if (!property_exists($object2, $key)) {
+            return getNode(
+                'removed',
+                $key,
+                ['old' => $object1->{$key}]
+            );
         }
-        if ($data1->{$key} === $data2->{$key}) {
-            return getNode('kept', $key, $data1->{$key});
+        if ($object1->{$key} === $object2->{$key}) {
+            return getNode(
+                'kept',
+                $key,
+                ['old' => $object1->{$key}, 'new' => $object2->{$key}]
+            );
         }
-        if (is_object($data1->{$key}) && is_object($data2->{$key})) {
-            return getNode('complex', $key, getDiff($data1->{$key}, $data2->{$key}));
+        if (is_object($object1->{$key}) && is_object($object2->{$key})) {
+            return getNode(
+                'complex',
+                $key,
+                [],
+                getDiff($object1->{$key}, $object2->{$key})
+            );
         }
-        return getNode('changed', $key, $data2->{$key}, $data1->{$key});
-    }, $nodeNames);
+        return getNode(
+            'changed',
+            $key,
+            ['old' => $object1->{$key}, 'new' => $object2->{$key}]
+        );
+    }, $nodeKeys);
+    return array_values($diff);
 }
 
-function getNode(string $type, $key, ...$nodeData): array
+function getNode(string $type, $key, array $values, array $children = []): array
 {
-    $node = ['type' => $type, 'key' => $key];
-    switch ($type) {
-        case 'added':
-        case 'removed':
-        case 'kept':
-            [$node['value']] = $nodeData;
-            break;
-        case 'changed':
-            [$node['value'], $node['old']] = $nodeData;
-            break;
-        case 'complex':
-            [$node['children']] = $nodeData;
-            break;
-        default:
-            throw new Exception("Unknown node type: {$type}");
-    }
-    return $node;
+    return [
+        'type' => $type,
+        'key' => $key,
+        'values' => $values,
+        'children' => $children
+    ];
 }
