@@ -2,7 +2,7 @@
 
 namespace Gendiff\Formatters\Json;
 
-function format(array $data): string
+function format(array $diff): string
 {
-    return json_encode($data, JSON_PRETTY_PRINT);
+    return json_encode($diff, JSON_PRETTY_PRINT);
 }

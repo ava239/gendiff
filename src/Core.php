@@ -42,43 +42,21 @@ function getDiff(object $object1, object $object2): array
     $keys1 = array_keys(get_object_vars($object1));
     $keys2 = array_keys(get_object_vars($object2));
     $nodeKeys = Collection\union($keys1, $keys2);
-    $diff = array_map(function ($key) use ($object1, $object2) {
+    return array_values(array_map(function ($key) use ($object1, $object2) {
         if (!property_exists($object1, $key)) {
-            return getNode(
-                'added',
-                $key,
-                ['new' => $object2->{$key}]
-            );
+            return getNode('added', $key, ['new' => $object2->{$key}]);
         }
         if (!property_exists($object2, $key)) {
-            return getNode(
-                'removed',
-                $key,
-                ['old' => $object1->{$key}]
-            );
+            return getNode('removed', $key, ['old' => $object1->{$key}]);
         }
         if ($object1->{$key} === $object2->{$key}) {
-            return getNode(
-                'kept',
-                $key,
-                ['old' => $object1->{$key}, 'new' => $object2->{$key}]
-            );
+            return getNode('kept', $key, ['old' => $object1->{$key}, 'new' => $object2->{$key}]);
         }
         if (is_object($object1->{$key}) && is_object($object2->{$key})) {
-            return getNode(
-                'complex',
-                $key,
-                [],
-                getDiff($object1->{$key}, $object2->{$key})
-            );
+            return getNode('complex', $key, [], getDiff($object1->{$key}, $object2->{$key}));
         }
-        return getNode(
-            'changed',
-            $key,
-            ['old' => $object1->{$key}, 'new' => $object2->{$key}]
-        );
-    }, $nodeKeys);
-    return array_values($diff);
+        return getNode('changed', $key, ['old' => $object1->{$key}, 'new' => $object2->{$key}]);
+    }, $nodeKeys));
 }
 
 function getNode(string $type, $key, array $values, array $children = []): array
