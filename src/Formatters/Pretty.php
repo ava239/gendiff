@@ -5,10 +5,6 @@ namespace Gendiff\Formatters\Pretty;
 use Exception;
 use Funct\Collection;
 
-use function Gendiff\Formatters\formatBooleanValue;
-
-use const Gendiff\Formatters\END_OF_LINE;
-
 const OPERATION_PREFIXES = [
     'kept' => '  ',
     'added' => '+ ',
@@ -16,49 +12,58 @@ const OPERATION_PREFIXES = [
 ],
 INDENT_STEP = '    ';
 
-function format(array $data): string
+function format(array $diff): string
 {
-    $iter = function ($node, $depth = 0) use (&$iter) {
-        switch ($node['type']) {
-            case 'complex':
-                return [
-                    getIndent($depth + 1) . "{$node['key']}: {",
-                    array_map(fn($child) => $iter($child, $depth + 1), $node['children']),
-                    getIndent($depth + 1) . "}"
-                ];
-            case 'changed':
-                return [
-                    sprintf(
+    $format = function ($diff, $depth = 0) use (&$format) {
+        return array_map(function ($node) use ($depth, $format) {
+            switch ($node['type']) {
+                case 'complex':
+                    return [
+                        getIndent($depth + 1) . "{$node['key']}: {",
+                        $format($node['children'], $depth + 1),
+                        getIndent($depth + 1) . "}"
+                    ];
+                case 'changed':
+                    return [
+                        sprintf(
+                            '  %s%s%s: %s',
+                            getIndent($depth),
+                            OPERATION_PREFIXES['removed'],
+                            $node['key'],
+                            formatValue($node['values']['old'], $depth)
+                        ),
+                        sprintf(
+                            '  %s%s%s: %s',
+                            getIndent($depth),
+                            OPERATION_PREFIXES['added'],
+                            $node['key'],
+                            formatValue($node['values']['new'], $depth)
+                        ),
+                    ];
+                case 'kept':
+                case 'added':
+                    return sprintf(
                         '  %s%s%s: %s',
                         getIndent($depth),
-                        OPERATION_PREFIXES['removed'],
+                        OPERATION_PREFIXES[$node['type']],
                         $node['key'],
-                        formatValue($node['old'], $depth)
-                    ),
-                    sprintf(
+                        formatValue($node['values']['new'], $depth)
+                    );
+                case 'removed':
+                    return sprintf(
                         '  %s%s%s: %s',
                         getIndent($depth),
-                        OPERATION_PREFIXES['added'],
+                        OPERATION_PREFIXES[$node['type']],
                         $node['key'],
-                        formatValue($node['value'], $depth)
-                    ),
-                ];
-            case 'kept':
-            case 'added':
-            case 'removed':
-                return sprintf(
-                    '  %s%s%s: %s',
-                    getIndent($depth),
-                    OPERATION_PREFIXES[$node['type']],
-                    $node['key'],
-                    formatValue($node['value'], $depth)
-                );
-            default:
-                throw new Exception("Unknown node type: '{$node['type']}'");
-        }
+                        formatValue($node['values']['old'], $depth)
+                    );
+                default:
+                    throw new Exception("Unknown node type: '{$node['type']}'");
+            }
+        }, $diff);
     };
-    $lines = Collection\flattenAll(["{", array_map(fn($node) => $iter($node), $data), "}"]);
-    return implode(END_OF_LINE, $lines);
+    $lines = Collection\flattenAll(["{", $format($diff), "}"]);
+    return implode("\n", $lines);
 }
 
 function getIndent(int $depth): string
@@ -71,41 +76,35 @@ function formatValue($value, int $depth): string
     $valueType = gettype($value);
     switch ($valueType) {
         case 'boolean':
-            return formatBooleanValue($value);
+            return $value ? 'true' : 'false';
         case 'object':
+            $lines = array_map(
+                fn($key) => sprintf(
+                    '  %s%s  %s: %s',
+                    getIndent($depth),
+                    INDENT_STEP,
+                    $key,
+                    formatValue($value->{$key}, $depth + 1)
+                ),
+                array_keys(get_object_vars($value))
+            );
             return implode(
-                END_OF_LINE,
-                [
-                    '{',
-                    ...array_map(
-                        fn($key) => sprintf(
-                            '  %s%s  %s: %s',
-                            getIndent($depth),
-                            INDENT_STEP,
-                            $key,
-                            formatValue($value->{$key}, $depth + 1)
-                        ),
-                        array_keys((array)$value)
-                    ),
-                    getIndent($depth + 1) . '}'
-                ]
+                "\n",
+                ['{', ...$lines, getIndent($depth + 1) . '}']
             );
         case 'array':
+            $lines = array_map(
+                fn($key) => sprintf(
+                    '  %s%s  %s',
+                    getIndent($depth),
+                    INDENT_STEP,
+                    formatValue($value[$key], $depth + 1)
+                ),
+                array_keys($value)
+            );
             return implode(
-                END_OF_LINE,
-                [
-                    '[',
-                    ...array_map(
-                        fn($key) => sprintf(
-                            '  %s%s  %s',
-                            getIndent($depth),
-                            INDENT_STEP,
-                            formatValue($value[$key], $depth + 1)
-                        ),
-                        array_keys($value)
-                    ),
-                    getIndent($depth + 1) . ']'
-                ]
+                "\n",
+                ['[', ...$lines, getIndent($depth + 1) . ']']
             );
         case 'NULL':
             return 'null';

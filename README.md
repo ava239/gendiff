@@ -24,10 +24,11 @@ Output formats supported (see below for examples):
 ### Standalone CLI utility
 Global installation with composer recomended
 ``` sh
-$ composer global require ava/gendiff
+$ composer g require ava/gendiff
 ```
 [![asciicast](https://asciinema.org/a/352365.svg)](https://asciinema.org/a/352365)
 Then you can run it globally (if you have global composer dir in your $PATH) as CLI program
+
 Usage format is:  
 ``` sh
 $ gendiff [--format <fmt>] <firstFile> <secondFile>
@@ -45,7 +46,7 @@ $ composer require ava/gendiff
 ```
 Then you can use it in your project
 ``` PHP
-use function Gendiff\Gendiff\compareFiles;
+use function Gendiff\Core\compareFiles;
 ...
 $diff = compareFiles($filepath1, $filepath2);
 ```
@@ -55,6 +56,7 @@ Formats supported:
 - pretty
 - plain
 - json
+
 Below you can find examples how different formats looks
 
 ## Usage examples (CLI version)

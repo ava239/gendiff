@@ -5,43 +5,41 @@ namespace Gendiff\Formatters\Plain;
 use Exception;
 use Funct\Collection;
 
-use function Gendiff\Formatters\formatBooleanValue;
-
-use const Gendiff\Formatters\END_OF_LINE;
-
-function format(array $data): string
+function format(array $diff): string
 {
-    $iter = function ($node, $prefix = '') use (&$iter) {
-        $fullNodeKey = $prefix . $node['key'];
-        switch ($node['type']) {
-            case 'complex':
-                return array_map(fn($item) => $iter($item, "{$fullNodeKey}."), $node['children']);
-            case 'added':
-                return sprintf(
-                    "Property '%s' was added with value: %s",
-                    $fullNodeKey,
-                    formatValue($node['value'])
-                );
-            case 'removed':
-                return sprintf(
-                    "Property '%s' was removed",
-                    $fullNodeKey
-                );
-            case 'changed':
-                return sprintf(
-                    "Property '%s' was changed. From %s to %s",
-                    $fullNodeKey,
-                    formatValue($node['old']),
-                    formatValue($node['value'])
-                );
-            case 'kept':
-                return [];
-            default:
-                throw new Exception("Unknown node type: '{$node['type']}'");
-        }
+    $format = function ($diff, $prefix = '') use (&$format) {
+        return array_map(function ($node) use ($prefix, $format) {
+            $fullNodeKey = $prefix . $node['key'];
+            switch ($node['type']) {
+                case 'added':
+                    return sprintf(
+                        "Property '%s' was added with value: %s",
+                        $fullNodeKey,
+                        formatValue($node['values']['new'])
+                    );
+                case 'removed':
+                    return sprintf(
+                        "Property '%s' was removed",
+                        $fullNodeKey
+                    );
+                case 'changed':
+                    return sprintf(
+                        "Property '%s' was changed. From %s to %s",
+                        $fullNodeKey,
+                        formatValue($node['values']['old']),
+                        formatValue($node['values']['new'])
+                    );
+                case 'kept':
+                    return [];
+                case 'complex':
+                    return $format($node['children'], "{$fullNodeKey}.");
+                default:
+                    throw new Exception("Unknown node type: '{$node['type']}'");
+            }
+        }, $diff);
     };
-    $lines = Collection\flattenAll(array_map(fn($node) => $iter($node), $data));
-    return implode(END_OF_LINE, $lines);
+    $lines = Collection\flattenAll($format($diff));
+    return implode("\n", $lines);
 }
 
 function formatValue($value): string
@@ -50,7 +48,8 @@ function formatValue($value): string
     $addQuotes = fn($value) => sprintf("'%s'", $value);
     switch ($valueType) {
         case 'boolean':
-            return $addQuotes(formatBooleanValue($value));
+            $formattedValue = $value ? 'true' : 'false';
+            return $addQuotes($formattedValue);
         case 'object':
         case 'array':
             return $addQuotes('complex value');

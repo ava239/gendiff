@@ -2,128 +2,182 @@
     {
         "type": "complex",
         "key": "common",
+        "values": [],
         "children": [
             {
                 "type": "kept",
                 "key": "setting1",
-                "value": "Value 1"
+                "values": {
+                    "old": "Value 1",
+                    "new": "Value 1"
+                },
+                "children": []
             },
             {
                 "type": "removed",
                 "key": "setting2",
-                "value": "200"
+                "values": {
+                    "old": "200"
+                },
+                "children": []
             },
             {
                 "type": "kept",
                 "key": "setting3",
-                "value": true
+                "values": {
+                    "old": true,
+                    "new": true
+                },
+                "children": []
             },
             {
                 "type": "changed",
                 "key": "settingBool",
-                "value": true,
-                "old": false
+                "values": {
+                    "old": false,
+                    "new": true
+                },
+                "children": []
             },
             {
                 "type": "removed",
                 "key": "setting6",
-                "value": {
-                    "key": "value"
-                }
+                "values": {
+                    "old": {
+                        "key": "value"
+                    }
+                },
+                "children": []
             },
             {
                 "type": "complex",
                 "key": "setting9",
+                "values": [],
                 "children": [
                     {
                         "type": "added",
                         "key": "keys",
-                        "value": 1
+                        "values": {
+                            "new": 1
+                        },
+                        "children": []
                     },
                     {
                         "type": "added",
                         "key": "test",
-                        "value": true
+                        "values": {
+                            "new": true
+                        },
+                        "children": []
                     }
                 ]
             },
             {
                 "type": "removed",
                 "key": "new",
-                "value": {
-                    "hosts": [
-                        "hexlet.io",
-                        "example.com",
-                        "google.ru",
-                        "differ.test"
-                    ]
-                }
+                "values": {
+                    "old": {
+                        "hosts": [
+                            "hexlet.io",
+                            "example.com",
+                            "google.ru",
+                            "differ.test"
+                        ]
+                    }
+                },
+                "children": []
             },
             {
                 "type": "added",
                 "key": "setting4",
-                "value": "blah blah"
+                "values": {
+                    "new": "blah blah"
+                },
+                "children": []
             },
             {
                 "type": "added",
                 "key": "setting5",
-                "value": {
-                    "key5": "value5",
-                    "kb": false
-                }
+                "values": {
+                    "new": {
+                        "key5": "value5",
+                        "kb": false
+                    }
+                },
+                "children": []
             },
             {
                 "type": "added",
                 "key": "nested",
-                "value": {
-                    "authors": [
-                        {
-                            "name": "Dima Oliferchuk",
-                            "email": "ava239@yandex.ru"
-                        },
-                        {
-                            "name": "Nikolay Gagarinov",
-                            "email": "feycot@gmail.com"
-                        }
-                    ]
-                }
+                "values": {
+                    "new": {
+                        "authors": [
+                            {
+                                "name": "Dima Oliferchuk",
+                                "email": "ava239@yandex.ru"
+                            },
+                            {
+                                "name": "Nikolay Gagarinov",
+                                "email": "feycot@gmail.com"
+                            }
+                        ]
+                    }
+                },
+                "children": []
             }
         ]
     },
     {
         "type": "complex",
         "key": "group1",
+        "values": [],
         "children": [
             {
                 "type": "changed",
                 "key": "baz",
-                "value": "bars",
-                "old": "bas"
+                "values": {
+                    "old": "bas",
+                    "new": "bars"
+                },
+                "children": []
             },
             {
                 "type": "kept",
                 "key": "foo",
-                "value": "bar"
+                "values": {
+                    "old": "bar",
+                    "new": "bar"
+                },
+                "children": []
             },
             {
                 "type": "added",
                 "key": "empty",
-                "value": null
+                "values": {
+                    "new": null
+                },
+                "children": []
             }
         ]
     },
     {
         "type": "removed",
         "key": "group2",
-        "value": {
-            "abc": 12345
-        }
+        "values": {
+            "old": {
+                "abc": 12345
+            }
+        },
+        "children": []
     },
     {
         "type": "added",
         "key": "group3",
-        "value": {
-            "fee": 100500
-        }
+        "values": {
+            "new": {
+                "fee": 100500
+            }
+        },
+        "children": []
     }
 ]
