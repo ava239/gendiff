@@ -5,7 +5,7 @@ namespace Gendiff\Formatters\Pretty;
 use Exception;
 use Funct\Collection;
 
-const OPERATION_PREFIXES = [
+const OPERATIONS = [
     'kept' => '  ',
     'added' => '+ ',
     'removed' => '- ',
@@ -16,6 +16,7 @@ function format(array $diff): string
 {
     $format = function ($diff, $depth = 0) use (&$format) {
         return array_map(function ($node) use ($depth, $format) {
+            $indent = getIndent($depth);
             switch ($node['type']) {
                 case 'complex':
                     return [
@@ -24,39 +25,19 @@ function format(array $diff): string
                         getIndent($depth + 1) . "}"
                     ];
                 case 'changed':
+                    $formattedOld = formatValue($node['values']['old'], $depth);
+                    $formattedNew = formatValue($node['values']['new'], $depth);
                     return [
-                        sprintf(
-                            '  %s%s%s: %s',
-                            getIndent($depth),
-                            OPERATION_PREFIXES['removed'],
-                            $node['key'],
-                            formatValue($node['values']['old'], $depth)
-                        ),
-                        sprintf(
-                            '  %s%s%s: %s',
-                            getIndent($depth),
-                            OPERATION_PREFIXES['added'],
-                            $node['key'],
-                            formatValue($node['values']['new'], $depth)
-                        ),
+                        sprintf('  %s%s%s: %s', $indent, OPERATIONS['removed'], $node['key'], $formattedOld),
+                        sprintf('  %s%s%s: %s', $indent, OPERATIONS['added'], $node['key'], $formattedNew),
                     ];
                 case 'kept':
                 case 'added':
-                    return sprintf(
-                        '  %s%s%s: %s',
-                        getIndent($depth),
-                        OPERATION_PREFIXES[$node['type']],
-                        $node['key'],
-                        formatValue($node['values']['new'], $depth)
-                    );
+                    $formattedValue = formatValue($node['values']['new'], $depth);
+                    return sprintf('  %s%s%s: %s', $indent, OPERATIONS[$node['type']], $node['key'], $formattedValue);
                 case 'removed':
-                    return sprintf(
-                        '  %s%s%s: %s',
-                        getIndent($depth),
-                        OPERATION_PREFIXES[$node['type']],
-                        $node['key'],
-                        formatValue($node['values']['old'], $depth)
-                    );
+                    $formattedValue = formatValue($node['values']['old'], $depth);
+                    return sprintf('  %s%s%s: %s', $indent, OPERATIONS[$node['type']], $node['key'], $formattedValue);
                 default:
                     throw new Exception("Unknown node type: '{$node['type']}'");
             }
@@ -79,13 +60,7 @@ function formatValue($value, int $depth): string
             return $value ? 'true' : 'false';
         case 'object':
             $lines = array_map(
-                fn($key) => sprintf(
-                    '  %s%s  %s: %s',
-                    getIndent($depth),
-                    INDENT_STEP,
-                    $key,
-                    formatValue($value->{$key}, $depth + 1)
-                ),
+                fn($key) => sprintf('  %s  %s: %s', getIndent($depth + 1), $key, formatValue($value->$key, $depth + 1)),
                 array_keys(get_object_vars($value))
             );
             return implode(
@@ -94,12 +69,7 @@ function formatValue($value, int $depth): string
             );
         case 'array':
             $lines = array_map(
-                fn($key) => sprintf(
-                    '  %s%s  %s',
-                    getIndent($depth),
-                    INDENT_STEP,
-                    formatValue($value[$key], $depth + 1)
-                ),
+                fn($key) => sprintf('  %s  %s', getIndent($depth + 1), formatValue($value[$key], $depth + 1)),
                 array_keys($value)
             );
             return implode(
