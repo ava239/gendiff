@@ -16,7 +16,6 @@ function format(array $diff): string
 {
     $format = function ($diff, $depth = 0) use (&$format) {
         return array_map(function ($node) use ($depth, $format) {
-            $indent = getIndent($depth);
             switch ($node['type']) {
                 case 'complex':
                     return [
@@ -25,19 +24,15 @@ function format(array $diff): string
                         getIndent($depth + 1) . "}"
                     ];
                 case 'changed':
-                    $formattedOld = formatValue($node['values']['old'], $depth);
-                    $formattedNew = formatValue($node['values']['new'], $depth);
                     return [
-                        sprintf('  %s%s%s: %s', $indent, OPERATIONS['removed'], $node['key'], $formattedOld),
-                        sprintf('  %s%s%s: %s', $indent, OPERATIONS['added'], $node['key'], $formattedNew),
+                        formatMessage($node['key'], OPERATIONS['removed'], $node['values']['old'], $depth),
+                        formatMessage($node['key'], OPERATIONS['added'], $node['values']['new'], $depth),
                     ];
                 case 'kept':
                 case 'added':
-                    $formattedValue = formatValue($node['values']['new'], $depth);
-                    return sprintf('  %s%s%s: %s', $indent, OPERATIONS[$node['type']], $node['key'], $formattedValue);
+                    return formatMessage($node['key'], OPERATIONS[$node['type']], $node['values']['new'], $depth);
                 case 'removed':
-                    $formattedValue = formatValue($node['values']['old'], $depth);
-                    return sprintf('  %s%s%s: %s', $indent, OPERATIONS[$node['type']], $node['key'], $formattedValue);
+                    return formatMessage($node['key'], OPERATIONS[$node['type']], $node['values']['old'], $depth);
                 default:
                     throw new Exception("Unknown node type: '{$node['type']}'");
             }
@@ -45,6 +40,12 @@ function format(array $diff): string
     };
     $lines = Collection\flattenAll(["{", $format($diff), "}"]);
     return implode("\n", $lines);
+}
+
+function formatMessage(string $key, string $operation, $value, int $depth, string $formatStr = '  %s%s%s: %s'): string
+{
+    $formattedValue = formatValue($value, $depth + 1);
+    return sprintf($formatStr, getIndent($depth), $operation, $key, $formattedValue);
 }
 
 function getIndent(int $depth): string
@@ -60,22 +61,16 @@ function formatValue($value, int $depth): string
             return $value ? 'true' : 'false';
         case 'object':
             $lines = array_map(
-                fn($key) => sprintf('  %s  %s: %s', getIndent($depth + 1), $key, formatValue($value->$key, $depth + 1)),
+                fn($key) => formatMessage($key, OPERATIONS['kept'], $value->$key, $depth),
                 array_keys(get_object_vars($value))
             );
-            return implode(
-                "\n",
-                ['{', ...$lines, getIndent($depth + 1) . '}']
-            );
+            return implode("\n", ['{', ...$lines, getIndent($depth) . '}']);
         case 'array':
             $lines = array_map(
-                fn($key) => sprintf('  %s  %s', getIndent($depth + 1), formatValue($value[$key], $depth + 1)),
-                array_keys($value)
+                fn($value) => formatMessage('', OPERATIONS['kept'], $value, $depth, '  %s%s%s%s'),
+                $value
             );
-            return implode(
-                "\n",
-                ['[', ...$lines, getIndent($depth + 1) . ']']
-            );
+            return implode("\n", ['[', ...$lines, getIndent($depth) . ']']);
         case 'NULL':
             return 'null';
         case 'integer':

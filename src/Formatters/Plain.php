@@ -18,10 +18,7 @@ function format(array $diff): string
                         formatValue($node['values']['new'])
                     );
                 case 'removed':
-                    return sprintf(
-                        "Property '%s' was removed",
-                        $fullNodeKey
-                    );
+                    return sprintf("Property '%s' was removed", $fullNodeKey);
                 case 'changed':
                     return sprintf(
                         "Property '%s' was changed. From %s to %s",
